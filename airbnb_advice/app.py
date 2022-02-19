@@ -1,4 +1,3 @@
-from tkinter.tix import INTEGER
 import streamlit as st
 import datetime
 # from shapely.geometry import Point, Polygon
@@ -10,6 +9,7 @@ import datetime
 # import requests
 # import json
 # import pydeck as pdk
+# from tkinter.tix import INTEGER
 
 
 st.markdown('''
