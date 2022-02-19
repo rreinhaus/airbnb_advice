@@ -56,3 +56,16 @@ pypi:
 
 streamlit:
 	@streamlit run airbnb_advice/app.py
+
+LOCAL_PATH="airbnb_advice/data/title_london.csv"
+
+# bucket directory in which to store the uploaded file (`data` is an arbitrary name that we choose to use)
+BUCKET_FOLDER=data
+
+# name for the uploaded file inside of the bucket (we choose not to rename the file that we upload)
+BUCKET_FILE_NAME=$(shell basename ${LOCAL_PATH})
+
+upload_data:
+    # @gsutil cp title_london.csv gs://airbnbadvice/data/title_london.csv
+    @gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
+
