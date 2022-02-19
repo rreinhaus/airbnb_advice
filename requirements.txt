@@ -32,4 +32,3 @@ termcolor
 streamlit
 shapely 
 datetime
-tkinter
