@@ -30,3 +30,4 @@ termcolor
 
 #user interface
 streamlit
+shapely 
