@@ -1,4 +1,6 @@
+from tkinter.tix import INTEGER
 import streamlit as st
+import datetime
 # from shapely.geometry import Point, Polygon
 # import geopandas as gpd
 # import pandas as pd
@@ -20,18 +22,41 @@ Richard, Nicolas, Christelle and Thomas
 st.markdown('''
 #Thanks to provide the data in the inbox below so Artificial Intelligence can predict the TAXI FARE  : 
 ''')
+###############################################
+#####  collection of the data form the USER 
+city_user = st.selectbox('select a city',  ["London"] )
+st.write("you are the owner of a housing in " , city_user)
+address = st.text_input("adress", "Fill in the adress of your housing")
+nb_bedrooms = st.slider("number or rooms", 1,10,2)
 
-st.slider("number or rooms", 1,10,2)
+reviews = int(st.number_input('Please insert the number of reviews of your housing' , min_value=0, value=5, step=1 ))
 
-st.markdown(""" <style> .font {
-font-size:50px ; font-family: 'Cooper Black'; color: #FF9633;} 
-</style> """, unsafe_allow_html=True)
-
-st.markdown('<p class="font">Guess the object Names</p>', unsafe_allow_html=True)
+amenities_string = st.text_input('Amenities :', 'Enter the amenities available at your housing')
+amenities_list = amenities_string.split()
+st.write('Amenities available are', amenities_string)
 
 
 
+rent_starting_date = st.date_input(
+    "When do you want to rent",
+    datetime.date(2022, 2 , 18))
+st.write('The starting date is ', rent_starting_date)
 
+min_stay = st.slider("minimum stay", 1,7,1)
+
+max_stay = st.slider("maximum stay" , 1,21,7)
+
+########################################
+
+json_for_api_request  = {   "city_user" : city_user ,
+                            "adress" : address ,
+                            "nb_bedrooms" : nb_bedrooms , 
+                            "reviews" : reviews,
+                            "amenities" : amenities_list ,
+                            "rent_starting_date" : rent_starting_date ,
+                            "min_stay" : min_stay ,
+                            "max_stay" : max_stay
+                            }
 
 
 
