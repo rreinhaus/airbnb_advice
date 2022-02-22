@@ -1,11 +1,9 @@
 # from tkinter.tix import INTEGER
 import streamlit as st
 import datetime
-# from google import cloud
-# from google.cloud import storage
-
 import pandas as pd
 import requests
+from google.cloud import storage
 
 # from shapely.geometry import Point, Polygon
 # import geopandas as gpd
@@ -40,6 +38,16 @@ st.markdown('''
 #####  collection of the data form the USER 
 city_user = st.selectbox('select a city',  ["London",""] )
 st.write("you are the owner of a housing in " , city_user)
+#####fonction pour récupére l'API
+if st.button('best keywords for the city'):
+    url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
+    response = requests.get(url).json()
+    city_keywords = response["keywords"]
+    text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '+city_keywords
+    st.text(text_to_show) #affiche le texte de l'API
+
+
+
 address = st.text_input("adress", "Fill in the adress of your housing")
 nb_bedrooms = st.slider("number or rooms", 1,10,2)
 
@@ -61,6 +69,10 @@ min_stay = st.slider("minimum stay", 1,7,1)
 max_stay = st.slider("maximum stay" , 1,21,7)
 
 ########################################
+# request
+# url = https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?
+
+
 
 json_for_api_request  = {  "city_user" : city_user ,
                             "adress" : address ,
