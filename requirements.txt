@@ -33,3 +33,4 @@ streamlit
 shapely 
 datetime
 geopandas
+geopy
