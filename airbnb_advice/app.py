@@ -43,9 +43,9 @@ if st.button('best keywords for the city'):
     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
     response = requests.get(url).json()
     city_keywords = response["keywords"]
-    text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '+city_keywords
-    st.text(text_to_show) #affiche le texte de l'API
-
+    text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
+    st.text(text_to_show) #show the text of the  API
+    st.text(city_keywords)
 
 
 address = st.text_input("adress", "Fill in the adress of your housing")
