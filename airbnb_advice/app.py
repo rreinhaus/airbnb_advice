@@ -49,7 +49,6 @@ loc = Nominatim(user_agent= "GetLoc" )
 geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
 location = loc.geocode(address +","+city_user+","+ country )
 
-
 latitude = location.latitude
 longitude = location.longitude
 
@@ -62,7 +61,7 @@ nb_beds = st.slider("how many beds",1,10,2) # the number of beds
 min_nights = st.slider("minimum night", 1,7,1)
 accomodates = int(st.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
 
-json_for_api_request  = {  "latitude" : latitude ,
+json_api_request  = {  "latitude" : latitude ,
                             "longitude" : longitude ,
                             "accomodates": accomodates,
                             "nb_bedrooms" : nb_bedrooms , 
