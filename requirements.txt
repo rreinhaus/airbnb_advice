@@ -32,3 +32,5 @@ termcolor
 streamlit
 shapely 
 datetime
+geopandas
+geopy

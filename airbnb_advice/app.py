@@ -1,27 +1,19 @@
 # from tkinter.tix import INTEGER
 import streamlit as st
 import datetime
-# from google import cloud
-# from google.cloud import storage
-
 import pandas as pd
 import requests
+from google.cloud import storage
 
-# from shapely.geometry import Point, Polygon
-# import geopandas as gpd
-# import pandas as pd
-# import geopy
-# from geopy.geocoders import Nominatim
-# from geopy.extra.rate_limiter import RateLimiter
-# import requests
-# import json
-# import pydeck as pdk
-
-# path = "gs://airbnbadvice/data/description_london.csv"
-# df = pd.read_csv(path)
-
-# client = storage.Client()
-# client( )
+from shapely.geometry import Point, Polygon
+import geopandas as gpd
+import pandas as pd
+import geopy
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
+import requests
+import json
+import pydeck as pdk
 
 
 st.markdown('''
@@ -38,57 +30,53 @@ st.markdown('''
 
 ###############################################
 #####  collection of the data form the USER 
+country=st.text_input('select a country','UK')
 city_user = st.selectbox('select a city',  ["London",""] )
-st.write("you are the owner of a housing in " , city_user)
 address = st.text_input("adress", "Fill in the adress of your housing")
-nb_bedrooms = st.slider("number or rooms", 1,10,2)
+full_adress = address + city_user + country
+#####fonction pour récupére l'API
+if st.button('best keywords for the city'):
+    url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
+    response = requests.get(url).json()
+    city_keywords = response["keywords"]
+    text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
+    st.text(text_to_show) #show the text of the  API
+    st.text(city_keywords)
 
-reviews = int(st.number_input('Please insert the number of reviews of your housing' , min_value=0, value=5, step=1 ))
+# Getting pick up location as address and transforming to coordinates
 
-amenities_string = st.text_input('Amenities :', 'Enter the amenities available at your housing')
-amenities_list = amenities_string.split()
-st.write('Amenities available are', amenities_string)
+loc = Nominatim(user_agent= "GetLoc" )
+geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
+location = loc.geocode(address +","+city_user+","+ country )
 
+latitude = location.latitude
+longitude = location.longitude
 
+st.markdown(latitude)
+st.markdown(longitude)
 
-rent_starting_date = st.date_input(
-    "When do you want to rent",
-    datetime.date(2022, 2 , 18))
-st.write('The starting date is ', rent_starting_date)
+entire_home = st.checkbox("Chek if you rent the entire home", value = False ) # binary does the user rent the full accomodation or not
+nb_bedrooms = st.slider("number or rooms", 1,10,2) #the number of room
+nb_beds = st.slider("how many beds",1,10,2) # the number of beds
+min_nights = st.slider("minimum night", 1,7,1)
+accomodates = int(st.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
 
-min_stay = st.slider("minimum stay", 1,7,1)
-
-max_stay = st.slider("maximum stay" , 1,21,7)
-
-########################################
-
-json_for_api_request  = {  "city_user" : city_user ,
-                            "adress" : address ,
+json_api_request  = {  "latitude" : latitude ,
+                            "longitude" : longitude ,
+                            "accomodates": accomodates,
                             "nb_bedrooms" : nb_bedrooms , 
-                            "reviews" : reviews,
-                            "amenities" : amenities_list ,
-                            "rent_starting_date" : rent_starting_date ,
-                            "min_stay" : min_stay ,
-                            "max_stay" : max_stay
+                            "nb_beds" : nb_beds,
+                            "min_nights" : min_nights , 
+                            "Entire_home_apt" : entire_home
                             }
 
-# request = request()
-# response = request.get("URL")
 
-# # Defining the number of columns
-# columns = st.columns(2)
+# reviews = int(st.number_input('Please insert the number of reviews of your housing' , min_value=0, value=5, step=1 ))
+# amenities_string = st.text_input('Amenities :', 'Enter the amenities available at your housing')
+# st.write('Amenities available are', amenities_string)
+# rent_starting_date = st.date_input(
+#     "When do you want to rent",
+#     datetime.date(2022, 2 , 18))
+# st.write('The starting date is ', rent_starting_date)
+# max_stay = st.slider("maximum stay" , 1,21,7)
 
-# # Getting pick up location as address and transforming to coordinates
-
-# column_pick = st.columns(2)
-
-# street_pick = column_pick[0].text_input("Which street you want to travel from?", value="20 W 34th Street")
-# city_pick = "New York"
-# country_pick = "USA"
-
-# geolocator = Nominatim(user_agent="GTA Lookup")
-# geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-# location_pick = geolocator.geocode(street_pick+", "+city_pick+","+country_pick)
-
-# lat_pick = location_pick.latitude
-# lon_pick = location_pick.longitude
