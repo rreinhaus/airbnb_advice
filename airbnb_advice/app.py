@@ -19,7 +19,7 @@ import pydeck as pdk
 st.markdown('''
 # AIR BNB ADVIC€
 ## Welcolme to our amazing app
-Richard, Nicolas, Christelle and Thomas
+Richard, Nicolas, Joana and Thomas
 
 ''')
 
@@ -61,12 +61,48 @@ nb_beds = st.slider("how many beds",1,10,2) # the number of beds
 min_nights = st.slider("minimum night", 1,7,1)
 accomodates = int(st.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
 
+#########################################
+# if st.button('Artifial Intelligence will compute best fare for your accomodation'):
+#     url = f"""https://airbnbadvice-zktracgm3q-ew.a.run.app/
+#             fare_prediction/?latitude=%{latitude}&
+#             longitude={longitude}&
+#             accomodates={accomodates}&
+#             bedrooms={nb_bedrooms}&
+#             beds={nb_beds}&
+#             minimum_nights={min_nights}&
+#             Entire_home_apt={min_nights}"""
+#     response = requests.get(url).json()
+#     fare_predicted = response['predicted_fare']
+#     st.text("the predicted price should be ")
+#     st.text("fare_predicted") 
+
+
+if st.button('Artifial Intelligence will compute best fare for your accomodation'):
+    url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
+    st.text(url)
+    response = requests.get(url).json()
+    fare_predicted = response['predicted_fare']
+    st.text("the predicted price should be ")
+    st.text(fare_predicted) 
+
+
+
+
+
+
+
+
+
+
+
+
+
 json_api_request  = {  "latitude" : latitude ,
                             "longitude" : longitude ,
                             "accomodates": accomodates,
                             "nb_bedrooms" : nb_bedrooms , 
                             "nb_beds" : nb_beds,
-                            "min_nights" : min_nights , 
+                            "minimum_nights" : min_nights , 
                             "Entire_home_apt" : entire_home
                             }
 
