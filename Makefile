@@ -13,6 +13,7 @@ black:
 test:
 	@coverage run -m pytest tests/*.py
 	@coverage report -m --omit="${VIRTUAL_ENV}/lib/python*"
+	
 
 ftest:
 	@Write me
@@ -57,15 +58,18 @@ pypi:
 streamlit:
 	@streamlit run airbnb_advice/app.py
 
-LOCAL_PATH="airbnb_advice/data/title_london.csv"
+LOCAL_PATH="raw_data/description_london.csv"
 
 # bucket directory in which to store the uploaded file (`data` is an arbitrary name that we choose to use)
 BUCKET_FOLDER=data
+BUCKET_NAME = airbnbadvice
 
 # name for the uploaded file inside of the bucket (we choose not to rename the file that we upload)
 BUCKET_FILE_NAME=$(shell basename ${LOCAL_PATH})
 
 upload_data:
-    # @gsutil cp title_london.csv gs://airbnbadvice/data/title_london.csv
-    @gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
+    # @gsutil cp train_1k.csv gs://wagon-ml-my-bucket-name/data/train_1k.csv
+	@gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
 
+run_api:
+	@uvicorn api.fast:app --reload

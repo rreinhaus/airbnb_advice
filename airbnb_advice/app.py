@@ -1,6 +1,12 @@
-from tkinter.tix import INTEGER
+# from tkinter.tix import INTEGER
 import streamlit as st
 import datetime
+# from google import cloud
+# from google.cloud import storage
+
+import pandas as pd
+import requests
+
 # from shapely.geometry import Point, Polygon
 # import geopandas as gpd
 # import pandas as pd
@@ -10,6 +16,12 @@ import datetime
 # import requests
 # import json
 # import pydeck as pdk
+
+# path = "gs://airbnbadvice/data/description_london.csv"
+# df = pd.read_csv(path)
+
+# client = storage.Client()
+# client( )
 
 
 st.markdown('''
@@ -22,9 +34,11 @@ Richard, Nicolas, Christelle and Thomas
 st.markdown('''
 #Thanks to provide the data in the inbox below so Artificial Intelligence can predict the TAXI FARE  : 
 ''')
+# st.write(df.head())
+
 ###############################################
 #####  collection of the data form the USER 
-city_user = st.selectbox('select a city',  ["London"] )
+city_user = st.selectbox('select a city',  ["London",""] )
 st.write("you are the owner of a housing in " , city_user)
 address = st.text_input("adress", "Fill in the adress of your housing")
 nb_bedrooms = st.slider("number or rooms", 1,10,2)
@@ -48,7 +62,7 @@ max_stay = st.slider("maximum stay" , 1,21,7)
 
 ########################################
 
-json_for_api_request  = {   "city_user" : city_user ,
+json_for_api_request  = {  "city_user" : city_user ,
                             "adress" : address ,
                             "nb_bedrooms" : nb_bedrooms , 
                             "reviews" : reviews,
@@ -58,7 +72,8 @@ json_for_api_request  = {   "city_user" : city_user ,
                             "max_stay" : max_stay
                             }
 
-
+# request = request()
+# response = request.get("URL")
 
 # # Defining the number of columns
 # columns = st.columns(2)
