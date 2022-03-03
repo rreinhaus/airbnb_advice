@@ -9,7 +9,7 @@ tokenizer.fit_on_texts(lines)
 sequences = tokenizer.texts_to_sequences(lines)
 
 # Loading the deep learning model
-model = load_model('models_testdeep_model_best.h5')
+model = load_model('models_testdeep_model_best(1).h5')
 
 # Input from the user for the prediction - THIS NEEDS TO BE CHANGED FROM THE STREAMLIT INPUT
 room_types = ['Entire Place', 'Private Room', 'Shared Room' ]
