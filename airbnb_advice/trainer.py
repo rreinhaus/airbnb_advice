@@ -129,7 +129,7 @@ def save_model(model):
     upload_model_to_gcp()
     print(f"uploaded model_best.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
-df = pd.read_csv('/home/rreinhaus/code/rreinhaus/airbnb_advice/raw_data/listings.csv')
+df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/listings.csv')
 df = df[['id', 'name']][df['review_scores_rating'] > 4]
 
 X_train, y_train, X_test,y_test, vocab_size, lines = preprocess(df)
