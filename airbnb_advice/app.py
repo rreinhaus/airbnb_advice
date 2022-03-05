@@ -15,7 +15,7 @@ import requests
 import json
 import pydeck as pdk
 import numpy as np
-
+import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static
 
@@ -168,6 +168,8 @@ if st.button('Artifial Intelligence will compute best fare for your accomodation
 # Rich Rating chart
 
 def neighbourhood_reviews(neighbourhood):
+    scores_rating = pd.read_csv('airbnb_advice/data/review_scores.csv')
+
     labels = ['accuracy', "cleanliness", "location", "communication","value", "checkin"]
     points = len(labels)
     angles = np.linspace(0, 2 * np.pi, points, endpoint=False).tolist()
@@ -179,6 +181,7 @@ def neighbourhood_reviews(neighbourhood):
     def add_to_star_neighbourhood(neighbourhood, color, label=None):
         values = neighbourhood_rating.loc[neighbourhood].tolist()
         values += values[:1]
+        del values[0]
         values.pop()
         if label != None:
             ax.plot(angles, values, color=color, linewidth=1, label=label)
@@ -219,4 +222,5 @@ def neighbourhood_reviews(neighbourhood):
 
     return add_to_star_neighbourhood(neighbourhood, '#1aaf6c', "First Property")
 
-neighbourhood_reviews(neighbourhood)
+st.set_option('deprecation.showPyplotGlobalUse', False)
+st.pyplot(neighbourhood_reviews(neighbourhood))
