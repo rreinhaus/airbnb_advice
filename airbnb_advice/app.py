@@ -18,6 +18,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static
+import plotly.express as px 
+
 
 st.set_page_config(
             page_title="Airbnb Advice", # => Quick reference - Streamlit
@@ -224,3 +226,8 @@ def neighbourhood_reviews(neighbourhood):
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.pyplot(neighbourhood_reviews(neighbourhood))
+
+data = pd.read_csv('airbnb_advice/data/superhost.csv')
+
+fig = px.histogram(data[data['neighbourhood_cleansed']== 'Camden'], x="host_is_superhost")
+st.write(fig)
