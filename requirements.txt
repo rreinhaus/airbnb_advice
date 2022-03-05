@@ -36,3 +36,5 @@ shapely
 datetime
 geopandas
 geopy
+folium
+streamlit_folium
