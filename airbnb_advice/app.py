@@ -14,6 +14,8 @@ from geopy.extra.rate_limiter import RateLimiter
 import requests
 import json
 import pydeck as pdk
+import numpy as np
+
 import folium
 from streamlit_folium import folium_static
 
@@ -22,6 +24,9 @@ st.set_page_config(
             page_icon="🐍",
             layout="centered", # wide
             initial_sidebar_state="auto") # collapsed
+
+
+
 
 st.markdown('''
 # AIR BNB ADVIC€
@@ -59,6 +64,15 @@ if st.button('best keywords for the city'):
     st.text(text_to_show) #show the text of the  API
     st.text(city_keywords)
 
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(lines)
+sequences = tokenizer.texts_to_sequences(lines)
+
+# Loading the deep learning model
+model = load_model('/home/thomas/code/thomasgassin/airbnb_advice/airbnb_advice/models_testdeep_model_best(1).h5')
+adds = st.text_input("adds", "Fill in two keywords")
+if st.button('the best announce will be '):
+    st.text(generate_text_seq(model, tokenizer, 6, seed_text=adds, n_words=7)) 
 # Getting pick up location as address and transforming to coordinates
 neighbourhood = None
 loc = Nominatim(user_agent= "GetLoc" )
