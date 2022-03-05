@@ -36,7 +36,7 @@ Richard, Nicolas, Joana and Thomas
 ''')
 
 st.sidebar.markdown('''
-Thanks to provide the data in the inbox below so Artificial Intelligence can predict the TAXI FARE  : 
+Thanks to provide the data in the inbox below so Artificial Intelligence can predict the TAXI FARE  :
 ''')
 # st.write(df.head())
 
@@ -64,15 +64,15 @@ if st.button('best keywords for the city'):
     st.text(text_to_show) #show the text of the  API
     st.text(city_keywords)
 
-tokenizer = Tokenizer()
-tokenizer.fit_on_texts(lines)
-sequences = tokenizer.texts_to_sequences(lines)
+# tokenizer = Tokenizer()
+# tokenizer.fit_on_texts(lines)
+# sequences = tokenizer.texts_to_sequences(lines)
 
 # Loading the deep learning model
-model = load_model('/home/thomas/code/thomasgassin/airbnb_advice/airbnb_advice/models_testdeep_model_best(1).h5')
-adds = st.text_input("adds", "Fill in two keywords")
-if st.button('the best announce will be '):
-    st.text(generate_text_seq(model, tokenizer, 6, seed_text=adds, n_words=7)) 
+# model = load_model('/home/thomas/code/thomasgassin/airbnb_advice/airbnb_advice/models_testdeep_model_best(1).h5')
+# adds = st.text_input("adds", "Fill in two keywords")
+# if st.button('the best announce will be '):
+#     st.text(generate_text_seq(model, tokenizer, 6, seed_text=adds, n_words=7))
 # Getting pick up location as address and transforming to coordinates
 neighbourhood = None
 loc = Nominatim(user_agent= "GetLoc" )
@@ -100,9 +100,9 @@ else:
             'London Borough of ', '')
     elif 'city' in location.raw['address']:
         neighbourhood = location.raw['address']['city']
-    else: 
+    else:
         st.text('address not located')
-    
+
 if neighbourhood is not None :
     st.markdown(neighbourhood)
     url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
@@ -139,7 +139,7 @@ def density_map_hood(data, neighbourhood, lat_long_hood):
                             fill=True,
                             opacity=0.7).add_to(m)
     return m
- 
+
 data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_data.csv")
 print("data maps loaded")
 
@@ -163,6 +163,4 @@ if st.button('Artifial Intelligence will compute best fare for your accomodation
     response = requests.get(url).json()
     fare_predicted = response['predicted_fare']
     st.text("the predicted price should be ")
-    st.text(fare_predicted) 
-
-
+    st.text(fare_predicted)
