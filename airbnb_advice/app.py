@@ -15,11 +15,18 @@ import requests
 import json
 import pydeck as pdk
 import numpy as np
-from airbnb_advice.trainer import lines
-from pred import generate_text_seq 
 
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.models import load_model
+import folium
+from streamlit_folium import folium_static
+
+st.set_page_config(
+            page_title="Airbnb Advice", # => Quick reference - Streamlit
+            page_icon="🐍",
+            layout="centered", # wide
+            initial_sidebar_state="auto") # collapsed
+
+
+
 
 st.markdown('''
 # AIR BNB ADVIC€
@@ -28,17 +35,26 @@ Richard, Nicolas, Joana and Thomas
 
 ''')
 
-st.markdown('''
-#Thanks to provide the data in the inbox below so Artificial Intelligence can predict the TAXI FARE  : 
+st.sidebar.markdown('''
+Thanks to provide the data in the inbox below so Artificial Intelligence can predict the TAXI FARE  : 
 ''')
 # st.write(df.head())
 
 ###############################################
-#####  collection of the data form the USER 
-country=st.text_input('select a country','UK')
-city_user = st.selectbox('select a city',  ["London",""] )
-address = st.text_input("adress", "Fill in the adress of your housing")
+#####  collection of the data form the USER in the SIDEBAR
+country=st.sidebar.text_input('select a country','UK')
+city_user = st.sidebar.selectbox('select a city',  ["London",""] )
+address = st.sidebar.text_input("adress", "Fill in the adress of your housing")
 full_adress = address + city_user + country
+
+entire_home = st.sidebar.checkbox("Chek if you rent the entire home", value = False ) # binary does the user rent the full accomodation or not
+nb_bedrooms = st.sidebar.slider("number or rooms", 1,10,2) #the number of room
+nb_beds = st.sidebar.slider("how many beds",1,10,2) # the number of beds
+min_nights = st.sidebar.slider("minimum night", 1,7,1)
+accomodates = int(st.sidebar.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
+
+
+
 #####fonction pour récupére l'API
 if st.button('best keywords for the city'):
     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
@@ -58,37 +74,87 @@ adds = st.text_input("adds", "Fill in two keywords")
 if st.button('the best announce will be '):
     st.text(generate_text_seq(model, tokenizer, 6, seed_text=adds, n_words=7)) 
 # Getting pick up location as address and transforming to coordinates
-
+neighbourhood = None
 loc = Nominatim(user_agent= "GetLoc" )
 geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
-location = loc.geocode(address +","+city_user+","+ country )
+location = loc.geocode(address +","+city_user+","+ country,addressdetails=True)
 
-latitude = location.latitude
-longitude = location.longitude
+if location is None:
+    st.text('it is bad address, try again')
+else:
+    latitude = location.latitude
+    longitude = location.longitude
+    st.markdown(latitude)
+    st.markdown(longitude)
+    if 'borough' in location.raw['address']:
+        neighbourhood = location.raw['address']['borough'].replace(
+            'London Borough of ', '')
+    elif 'city_district' in location.raw['address']:
+        neighbourhood = location.raw['address']['city_district'].replace(
+            'London Borough of ', '')
+    elif 'quarter' in location.raw['address']:
+            neighbourhood = location.raw['address']['quarter'].replace(
+        'London Borough of ','')
+    elif 'suburb' in location.raw['address']:
+        neighbourhood = location.raw['address']['suburb'].replace(
+            'London Borough of ', '')
+    elif 'city' in location.raw['address']:
+        neighbourhood = location.raw['address']['city']
+    else: 
+        st.text('address not located')
+    
+if neighbourhood is not None :
+    st.markdown(neighbourhood)
+    url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
+    # st.markdown(url_map)
 
-st.markdown(latitude)
-st.markdown(longitude)
+############API for the map
 
-entire_home = st.checkbox("Chek if you rent the entire home", value = False ) # binary does the user rent the full accomodation or not
-nb_bedrooms = st.slider("number or rooms", 1,10,2) #the number of room
-nb_beds = st.slider("how many beds",1,10,2) # the number of beds
-min_nights = st.slider("minimum night", 1,7,1)
-accomodates = int(st.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
+
+# response = requests.get(url).json()
+# neighboorhood = response["keywords"]
+#     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
+#     st.text(text_to_show) #show the text of the  API
+#     st.text(city_keywords)
+
+# def density_map_hood(data, neighbourhood, lat_long_hood):
+#     lat = lat_long_hood.loc[neighbourhood].latitude
+#     lon = lat_long_hood.loc[neighbourhood].longitude
+#     m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
+#     for index, row in data.iterrows():
+#         folium.CircleMarker([row['latitude'], row['longitude']],
+#                             radius=1,
+#                             fill=True,
+#                             opacity=0.7).add_to(m)
+#     return m
+# density plot given neighbourhood
+
+def density_map_hood(data, neighbourhood, lat_long_hood):
+    lat = lat_long_hood.loc[neighbourhood].latitude
+    lon = lat_long_hood.loc[neighbourhood].longitude
+    m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
+    for row in data.to_numpy():
+        folium.CircleMarker([row[1], row[2]],
+                            radius=1,
+                            fill=True,
+                            opacity=0.7).add_to(m)
+    return m
+ 
+data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_data.csv")
+print("data maps loaded")
+
+# @st.cache(suppress_st_warning=True)
+def csv_loader(X,neighbourhood):
+    X = X[X['neighbourhood_cleansed'] == neighbourhood]
+    lat_long_hood = X.groupby("neighbourhood_cleansed").mean()
+    maps = density_map_hood(X, neighbourhood,lat_long_hood)
+    return folium_static(maps ) #X[["latitude","longitude"]])
+
+
+# st.map(csv_loader(data_maps,neighbourhood))
+csv_loader(data_maps,neighbourhood)
 
 #########################################
-# if st.button('Artifial Intelligence will compute best fare for your accomodation'):
-#     url = f"""https://airbnbadvice-zktracgm3q-ew.a.run.app/
-#             fare_prediction/?latitude=%{latitude}&
-#             longitude={longitude}&
-#             accomodates={accomodates}&
-#             bedrooms={nb_bedrooms}&
-#             beds={nb_beds}&
-#             minimum_nights={min_nights}&
-#             Entire_home_apt={min_nights}"""
-#     response = requests.get(url).json()
-#     fare_predicted = response['predicted_fare']
-#     st.text("the predicted price should be ")
-#     st.text("fare_predicted") 
 
 
 if st.button('Artifial Intelligence will compute best fare for your accomodation'):
@@ -99,34 +165,4 @@ if st.button('Artifial Intelligence will compute best fare for your accomodation
     st.text("the predicted price should be ")
     st.text(fare_predicted) 
 
-
-
-
-
-
-
-
-
-
-
-
-
-json_api_request  = {  "latitude" : latitude ,
-                            "longitude" : longitude ,
-                            "accomodates": accomodates,
-                            "nb_bedrooms" : nb_bedrooms , 
-                            "nb_beds" : nb_beds,
-                            "minimum_nights" : min_nights , 
-                            "Entire_home_apt" : entire_home
-                            }
-
-
-# reviews = int(st.number_input('Please insert the number of reviews of your housing' , min_value=0, value=5, step=1 ))
-# amenities_string = st.text_input('Amenities :', 'Enter the amenities available at your housing')
-# st.write('Amenities available are', amenities_string)
-# rent_starting_date = st.date_input(
-#     "When do you want to rent",
-#     datetime.date(2022, 2 , 18))
-# st.write('The starting date is ', rent_starting_date)
-# max_stay = st.slider("maximum stay" , 1,21,7)
 
