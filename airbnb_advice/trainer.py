@@ -129,19 +129,22 @@ def save_model(model):
     upload_model_to_gcp()
     print(f"uploaded model_best.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
-df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/listings.csv')
-df = df[['id', 'name']][df['review_scores_rating'] > 4]
-
-X_train, y_train, X_test,y_test, vocab_size, lines = preprocess(df)
 
 if __name__ == '__main__':
     # get training data from GCP bucket
-    df = pd.read_csv('/home/rreinhaus/code/rreinhaus/airbnb_advice/raw_data/listings.csv')
+    df = pd.read_csv('../raw_data/listings.csv')
     df = df[['id', 'name']][df['review_scores_rating'] > 4]
 
     # preprocess data
     X_train, y_train, X_test,y_test, vocab_size, lines = preprocess(df)
 
+    #lines_df = {'lines':lines}
+    #lines_df = pd.DataFrame(lines_df) 
+    
+    # saving the dataframe 
+    #lines_df.to_csv('lines.csv')
+    #print('It is done')
+    
     # train model (locally if this file was called through the run_locally command
     # or on GCP if it was called through the gcp_submit_training, in which case
     # this package is uploaded to GCP before being executed)
