@@ -156,7 +156,6 @@ csv_loader(data_maps,neighbourhood)
 
 #########################################
 
-
 if st.button('Artifial Intelligence will compute best fare for your accomodation'):
     url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
     st.text(url)
@@ -164,3 +163,60 @@ if st.button('Artifial Intelligence will compute best fare for your accomodation
     fare_predicted = response['predicted_fare']
     st.text("the predicted price should be ")
     st.text(fare_predicted)
+
+###############
+# Rich Rating chart
+
+def neighbourhood_reviews(neighbourhood):
+    labels = ['accuracy', "cleanliness", "location", "communication","value", "checkin"]
+    points = len(labels)
+    angles = np.linspace(0, 2 * np.pi, points, endpoint=False).tolist()
+    angles += angles[:1]
+    angles.pop()
+    neighbourhood_rating = scores_rating[scores_rating['neighbourhood'] == neighbourhood]
+    neighbourhood_rating = neighbourhood_rating.groupby('neighbourhood').median()
+    
+    def add_to_star_neighbourhood(neighbourhood, color, label=None):
+        values = neighbourhood_rating.loc[neighbourhood].tolist()
+        values += values[:1]
+        values.pop()
+        if label != None:
+            ax.plot(angles, values, color=color, linewidth=1, label=label)
+        else:
+            ax.plot(angles, values, color=color, linewidth=1, label=neighbourhood)
+        ax.fill(angles, values, color=color, alpha=0.25)
+
+    ## Create plot object   
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+
+    ## Fix axis to star from top
+    ax.set_theta_offset(np.pi / 2)
+
+    ax.set_theta_direction(-1)
+
+    # Change the color of the ticks
+    ax.tick_params(colors='#222222')
+
+
+    ax.tick_params(axis='y', labelsize=0)
+    # Make the x-axis labels larger or smaller.
+    ax.tick_params(axis='x', labelsize=13)
+
+
+    # Change the color of the circular gridlines.
+    ax.grid(color='#AAAAAA')
+
+    # Change the color of the outer circle
+    ax.spines['polar'].set_color('#222222')
+
+    # Change the circle background color
+    ax.set_facecolor('#FAFAFA')# Add title and legend
+    ax.set_title('Comparing Property Ratings', y=1.08)
+
+    # Draw axis lines for each angle and label.
+    ax.set_thetagrids(np.degrees(angles), labels)
+
+
+    return add_to_star_neighbourhood(neighbourhood, '#1aaf6c', "First Property")
+
+neighbourhood_reviews(neighbourhood)
