@@ -143,8 +143,8 @@ def csv_loader(X,neighbourhood):
     return folium_static(maps ) #X[["latitude","longitude"]])
 
 
-# st.map(csv_loader(data_maps,neighbourhood))
-#csv_loader(data_maps,neighbourhood)
+#st.map(csv_loader(data_maps,neighbourhood))
+csv_loader(data_maps,neighbourhood)
 
 #########################################
 
@@ -160,7 +160,7 @@ if st.button('Artifial Intelligence will compute best fare for your accomodation
 # Rich Rating chart
 
 def neighbourhood_reviews(neighbourhood):
-    scores_rating = pd.read_csv('airbnb_advice/data/review_scores.csv')
+    scores_rating = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/review_scores.csv')
 
     labels = ['accuracy', "cleanliness", "location", "communication","value", "checkin"]
     points = len(labels)
@@ -182,7 +182,7 @@ def neighbourhood_reviews(neighbourhood):
         ax.fill(angles, values, color=color, alpha=0.25)
 
     ## Create plot object   
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(3, 3), subplot_kw=dict(polar=True))
 
     ## Fix axis to star from top
     ax.set_theta_offset(np.pi / 2)
@@ -222,11 +222,125 @@ data = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/superhost.c
 fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
 st.write(fig)
 
-
-
 words = st.text_input('Describe the Airbnb you want to list for the title')
 url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
 response_announce = requests.get(url).json()
 announce_predicted = response_announce['announce']
 st.text("The title is...")
 st.text(announce_predicted)
+
+def occup_per_year(price_df, neighbourhood):
+
+    occup_hood = price_df.groupby("neighbourhood_cleansed").median()[[
+
+        'occupancy_month', 'occupancy_year'
+
+    ]].reset_index()
+
+    occupied = occup_hood[(
+
+        occup_hood['neighbourhood_cleansed'] == neighbourhood)]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 5))
+
+    fig.suptitle('Percentages of occupancy', fontsize=20)
+
+    to_plot_month = [
+
+        float(occupied['occupancy_month']),
+
+        1 - float(occupied['occupancy_month'])
+
+    ]
+
+    mylabels_month = [
+
+        'occupied' + '\n' +
+
+        str(round(float(occupied['occupancy_month']) * 100, 2)) + '%', 'vacant'
+
+    ]
+
+    myexplode = [0.1, 0]
+
+    ax1.pie(
+
+        to_plot_month,
+
+        labels=mylabels_month,
+
+        explode=myexplode,
+
+        radius=1.3,
+
+        labeldistance=0.5,
+
+        #rotatelabels=True,
+
+        textprops=dict(rotation_mode='anchor', va='center', ha='left'),
+
+    )
+
+    ax1.set_title('Monthly occupancy', y=1.08)
+
+    to_plot_year = [
+
+        float(occupied['occupancy_year']),
+
+        1 - float(occupied['occupancy_year'])
+
+    ]
+
+    mylabels_year = [
+
+        'occupied' + '\n' +
+
+        str(round(float(occupied['occupancy_year']) * 100, 2)) + '%', 'vacant'
+
+    ]
+
+    ax2.pie(
+
+        to_plot_year,
+
+        labels=mylabels_year,
+
+        explode=myexplode,
+
+        radius=1.3,
+
+        labeldistance=0.5,
+
+        textprops=dict(rotation_mode='anchor', va='center', ha='left'),
+
+    )
+
+    ax2.set_title('Yearly occupancy', y=1.08)
+
+    return fig, to_plot_month[0], to_plot_year[0]​
+
+fare_predicted = fare_predicted # DELETE when above is working
+
+if st.button('What is your potential revenue?'):
+
+    if fare_predicted is not None:
+
+        monthly_revenue = occup_per_year(
+
+            price_df, neighbourhood)[1] * 30.5 * fare_predicted
+
+        yearly_revenue = occup_per_year(
+
+            price_df, neighbourhood)[2] * 365 * fare_predicted
+
+        st.text(f'''If you achieve the average occupancy rate of your area,
+
+your potential revenue is of £{monthly_revenue} per month and
+
+£{yearly_revenue} per year.''')
+
+        st.pyplot(occup_per_year(price_df, neighbourhood)[0])
+
+    else:
+
+        st.text('''Please run the model above first.''')
