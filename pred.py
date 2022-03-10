@@ -2,24 +2,28 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
-from airbnb_advice.trainer import lines
-
-tokenizer = Tokenizer()
-tokenizer.fit_on_texts(lines)
-sequences = tokenizer.texts_to_sequences(lines)
-
-# Loading the deep learning model
-model = load_model('models_testdeep_model_best(1).h5')
+import pandas as pd
 
 # Input from the user for the prediction - THIS NEEDS TO BE CHANGED FROM THE STREAMLIT INPUT
 room_types = ['Entire Place', 'Private Room', 'Shared Room' ]
 
-def generate_text_seq(model, tokenizer, text_seq_length, seed_text, n_words):
+def generate_text_seq(input_text):
+  lines = pd.read_csv('airbnb_advice/data/lines.csv')
+  lines = lines['lines'].values.tolist()
+
+  # Tokenizing the input on the lines and achieving the sequences required for the model
+  tokenizer = Tokenizer()
+  tokenizer.fit_on_texts(lines)
+  sequences = tokenizer.texts_to_sequences(lines)
+
+  # Loading the deep learning model
+  model = load_model('models_testdeep_model_best(1).h5')
+
   text = []
 
-  for _ in range(n_words):
-    encoded = tokenizer.texts_to_sequences([seed_text])[0]
-    encoded = pad_sequences([encoded], maxlen=text_seq_length, truncating='pre')
+  for _ in range(8):
+    encoded = tokenizer.texts_to_sequences([input_text])[0]
+    encoded = pad_sequences([encoded], maxlen=6, truncating='pre')
 
     y_predict = np.argmax(model.predict(encoded), axis=-1)
 
@@ -28,13 +32,13 @@ def generate_text_seq(model, tokenizer, text_seq_length, seed_text, n_words):
       if index == y_predict:
         predicted_word = word 
         break
-    seed_text = seed_text + ' ' + predicted_word
+    input_text = input_text + ' ' + predicted_word
     text.append(predicted_word)
 
   return ' '.join(text)
 
 
 if __name__ == '__main__':
-    result = generate_text_seq(model, tokenizer, 6, seed_text=room_types[0], n_words=7)
+    result = generate_text_seq(room_types[0])
     title = room_types[0] + ' - ' + result
     print(title)
