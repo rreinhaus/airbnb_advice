@@ -15,9 +15,11 @@ import requests
 import json
 import pydeck as pdk
 import numpy as np
-
+import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static
+import plotly.express as px 
+
 
 st.set_page_config(
             page_title="Airbnb Advice", # => Quick reference - Streamlit
@@ -55,8 +57,8 @@ accomodates = int(st.sidebar.number_input('how many guests can you accomodate' ,
 
 
 
-#####fonction pour récupére l'API
-if st.button('best keywords for the city'):
+# # #####fonction pour récupére l'API
+if st.button('Top Keywords Used by Superhosts in London'):
     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
     response = requests.get(url).json()
     city_keywords = response["keywords"]
@@ -64,15 +66,6 @@ if st.button('best keywords for the city'):
     st.text(text_to_show) #show the text of the  API
     st.text(city_keywords)
 
-# tokenizer = Tokenizer()
-# tokenizer.fit_on_texts(lines)
-# sequences = tokenizer.texts_to_sequences(lines)
-
-# Loading the deep learning model
-# model = load_model('/home/thomas/code/thomasgassin/airbnb_advice/airbnb_advice/models_testdeep_model_best(1).h5')
-# adds = st.text_input("adds", "Fill in two keywords")
-# if st.button('the best announce will be '):
-#     st.text(generate_text_seq(model, tokenizer, 6, seed_text=adds, n_words=7))
 # Getting pick up location as address and transforming to coordinates
 neighbourhood = None
 loc = Nominatim(user_agent= "GetLoc" )
@@ -103,31 +96,30 @@ else:
     else:
         st.text('address not located')
 
-if neighbourhood is not None :
-    st.markdown(neighbourhood)
-    url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
-    # st.markdown(url_map)
+# if neighbourhood is not None :
+#     st.markdown(neighbourhood)
+#     url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
+#     st.markdown(url_map)
 
-############API for the map
-
-
-# response = requests.get(url).json()
-# neighboorhood = response["keywords"]
+# ############ API for the map
+#     response = requests.get(url_map).json()
+#     neighboorhood = response["keywords"]
 #     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
 #     st.text(text_to_show) #show the text of the  API
 #     st.text(city_keywords)
 
-# def density_map_hood(data, neighbourhood, lat_long_hood):
-#     lat = lat_long_hood.loc[neighbourhood].latitude
-#     lon = lat_long_hood.loc[neighbourhood].longitude
-#     m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
-#     for index, row in data.iterrows():
-#         folium.CircleMarker([row['latitude'], row['longitude']],
-#                             radius=1,
-#                             fill=True,
-#                             opacity=0.7).add_to(m)
-#     return m
-# density plot given neighbourhood
+def density_map_hood(data, neighbourhood, lat_long_hood):
+    lat = lat_long_hood.loc[neighbourhood].latitude
+    lon = lat_long_hood.loc[neighbourhood].longitude
+    m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
+    for index, row in data.iterrows():
+        folium.CircleMarker([row['latitude'], row['longitude']],
+                            radius=1,
+                            fill=True,
+                            opacity=0.7).add_to(m)
+    return m
+
+#density plot given neighbourhood
 
 def density_map_hood(data, neighbourhood, lat_long_hood):
     lat = lat_long_hood.loc[neighbourhood].latitude
@@ -152,10 +144,9 @@ def csv_loader(X,neighbourhood):
 
 
 # st.map(csv_loader(data_maps,neighbourhood))
-csv_loader(data_maps,neighbourhood)
+#csv_loader(data_maps,neighbourhood)
 
 #########################################
-
 
 if st.button('Artifial Intelligence will compute best fare for your accomodation'):
     url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
@@ -164,3 +155,78 @@ if st.button('Artifial Intelligence will compute best fare for your accomodation
     fare_predicted = response['predicted_fare']
     st.text("the predicted price should be ")
     st.text(fare_predicted)
+
+###############
+# Rich Rating chart
+
+def neighbourhood_reviews(neighbourhood):
+    scores_rating = pd.read_csv('airbnb_advice/data/review_scores.csv')
+
+    labels = ['accuracy', "cleanliness", "location", "communication","value", "checkin"]
+    points = len(labels)
+    angles = np.linspace(0, 2 * np.pi, points, endpoint=False).tolist()
+    angles += angles[:1]
+    angles.pop()
+    neighbourhood_rating = scores_rating[scores_rating['neighbourhood'] == neighbourhood]
+    neighbourhood_rating = neighbourhood_rating.groupby('neighbourhood').median()
+    
+    def add_to_star_neighbourhood(neighbourhood, color, label=None):
+        values = neighbourhood_rating.loc[neighbourhood].tolist()
+        values += values[:1]
+        del values[0]
+        values.pop()
+        if label != None:
+            ax.plot(angles, values, color=color, linewidth=1, label=label)
+        else:
+            ax.plot(angles, values, color=color, linewidth=1, label=neighbourhood)
+        ax.fill(angles, values, color=color, alpha=0.25)
+
+    ## Create plot object   
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+
+    ## Fix axis to star from top
+    ax.set_theta_offset(np.pi / 2)
+
+    ax.set_theta_direction(-1)
+
+    # Change the color of the ticks
+    ax.tick_params(colors='#222222')
+
+
+    ax.tick_params(axis='y', labelsize=0)
+    # Make the x-axis labels larger or smaller.
+    ax.tick_params(axis='x', labelsize=13)
+
+
+    # Change the color of the circular gridlines.
+    ax.grid(color='#AAAAAA')
+
+    # Change the color of the outer circle
+    ax.spines['polar'].set_color('#222222')
+
+    # Change the circle background color
+    ax.set_facecolor('#FAFAFA')# Add title and legend
+    ax.set_title('Comparing Property Ratings', y=1.08)
+
+    # Draw axis lines for each angle and label.
+    ax.set_thetagrids(np.degrees(angles), labels)
+
+
+    return add_to_star_neighbourhood(neighbourhood, '#1aaf6c', "First Property")
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+st.pyplot(neighbourhood_reviews(neighbourhood))
+
+data = pd.read_csv('raw_data/superhost.csv')
+
+fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
+st.write(fig)
+
+
+
+words = st.text_input('Describe the Airbnb you want to list for the title')
+url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
+response_announce = requests.get(url).json()
+announce_predicted = response_announce['announce']
+st.text("The title is...")
+st.text(announce_predicted)
