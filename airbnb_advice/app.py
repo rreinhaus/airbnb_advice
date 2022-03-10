@@ -66,158 +66,160 @@ if st.button('Top Keywords Used by Superhosts in London'):
     st.text(text_to_show) #show the text of the  API
     st.text(city_keywords)
 
-# Getting pick up location as address and transforming to coordinates
-neighbourhood = None
-loc = Nominatim(user_agent= "GetLoc" )
-geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
-location = loc.geocode(address +","+city_user+","+ country,addressdetails=True)
+# # Getting pick up location as address and transforming to coordinates
+# neighbourhood = None
+# loc = Nominatim(user_agent= "GetLoc" )
+# geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
+# location = loc.geocode(address +","+city_user+","+ country,addressdetails=True)
 
-if location is None:
-    st.text('it is bad address, try again')
-else:
-    latitude = location.latitude
-    longitude = location.longitude
-    st.markdown(latitude)
-    st.markdown(longitude)
-    if 'borough' in location.raw['address']:
-        neighbourhood = location.raw['address']['borough'].replace(
-            'London Borough of ', '')
-    elif 'city_district' in location.raw['address']:
-        neighbourhood = location.raw['address']['city_district'].replace(
-            'London Borough of ', '')
-    elif 'quarter' in location.raw['address']:
-            neighbourhood = location.raw['address']['quarter'].replace(
-        'London Borough of ','')
-    elif 'suburb' in location.raw['address']:
-        neighbourhood = location.raw['address']['suburb'].replace(
-            'London Borough of ', '')
-    elif 'city' in location.raw['address']:
-        neighbourhood = location.raw['address']['city']
-    else:
-        st.text('address not located')
+# if location is None:
+#     st.text('it is bad address, try again')
+# else:
+#     latitude = location.latitude
+#     longitude = location.longitude
+#     st.markdown(latitude)
+#     st.markdown(longitude)
+#     if 'borough' in location.raw['address']:
+#         neighbourhood = location.raw['address']['borough'].replace(
+#             'London Borough of ', '')
+#     elif 'city_district' in location.raw['address']:
+#         neighbourhood = location.raw['address']['city_district'].replace(
+#             'London Borough of ', '')
+#     elif 'quarter' in location.raw['address']:
+#             neighbourhood = location.raw['address']['quarter'].replace(
+#         'London Borough of ','')
+#     elif 'suburb' in location.raw['address']:
+#         neighbourhood = location.raw['address']['suburb'].replace(
+#             'London Borough of ', '')
+#     elif 'city' in location.raw['address']:
+#         neighbourhood = location.raw['address']['city']
+#     else:
+#         st.text('address not located')
 
-# if neighbourhood is not None :
-#     st.markdown(neighbourhood)
-#     url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
-#     st.markdown(url_map)
+# # if neighbourhood is not None :
+# #     st.markdown(neighbourhood)
+# #     url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
+# #     st.markdown(url_map)
 
-# ############ API for the map
-#     response = requests.get(url_map).json()
-#     neighboorhood = response["keywords"]
-#     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
-#     st.text(text_to_show) #show the text of the  API
-#     st.text(city_keywords)
+# # ############ API for the map
+# #     response = requests.get(url_map).json()
+# #     neighboorhood = response["keywords"]
+# #     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
+# #     st.text(text_to_show) #show the text of the  API
+# #     st.text(city_keywords)
 
-def density_map_hood(data, neighbourhood, lat_long_hood):
-    lat = lat_long_hood.loc[neighbourhood].latitude
-    lon = lat_long_hood.loc[neighbourhood].longitude
-    m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
-    for index, row in data.iterrows():
-        folium.CircleMarker([row['latitude'], row['longitude']],
-                            radius=1,
-                            fill=True,
-                            opacity=0.7).add_to(m)
-    return m
+# def density_map_hood(data, neighbourhood, lat_long_hood):
+#     lat = lat_long_hood.loc[neighbourhood].latitude
+#     lon = lat_long_hood.loc[neighbourhood].longitude
+#     m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
+#     for index, row in data.iterrows():
+#         folium.CircleMarker([row['latitude'], row['longitude']],
+#                             radius=1,
+#                             fill=True,
+#                             opacity=0.7).add_to(m)
+#     return m
 
-#density plot given neighbourhood
+# #density plot given neighbourhood
 
-def density_map_hood(data, neighbourhood, lat_long_hood):
-    lat = lat_long_hood.loc[neighbourhood].latitude
-    lon = lat_long_hood.loc[neighbourhood].longitude
-    m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
-    for row in data.to_numpy():
-        folium.CircleMarker([row[1], row[2]],
-                            radius=1,
-                            fill=True,
-                            opacity=0.7).add_to(m)
-    return m
+# def density_map_hood(data, neighbourhood, lat_long_hood):
+#     lat = lat_long_hood.loc[neighbourhood].latitude
+#     lon = lat_long_hood.loc[neighbourhood].longitude
+#     m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
+#     for row in data.to_numpy():
+#         folium.CircleMarker([row[1], row[2]],
+#                             radius=1,
+#                             fill=True,
+#                             opacity=0.7).add_to(m)
+#     return m
 
-data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_data.csv")
-print("data maps loaded")
+# data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_data.csv")
+# print("data maps loaded")
 
-# @st.cache(suppress_st_warning=True)
-def csv_loader(X,neighbourhood):
-    X = X[X['neighbourhood_cleansed'] == neighbourhood]
-    lat_long_hood = X.groupby("neighbourhood_cleansed").mean()
-    maps = density_map_hood(X, neighbourhood,lat_long_hood)
-    return folium_static(maps ) #X[["latitude","longitude"]])
+# # @st.cache(suppress_st_warning=True)
+# def csv_loader(X,neighbourhood):
+#     X = X[X['neighbourhood_cleansed'] == neighbourhood]
+#     lat_long_hood = X.groupby("neighbourhood_cleansed").mean()
+#     maps = density_map_hood(X, neighbourhood,lat_long_hood)
+#     return folium_static(maps ) #X[["latitude","longitude"]])
 
 
-#st.map(csv_loader(data_maps,neighbourhood))
-csv_loader(data_maps,neighbourhood)
+# #st.map(csv_loader(data_maps,neighbourhood))
+# csv_loader(data_maps,neighbourhood)
 
-#########################################
+# #########################################
 
-fare_predicted = ''
+# fare_predicted = ''
 
-if st.button('Artifial Intelligence will compute best fare for your accomodation'):
-    url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
-    st.text(url)
-    response = requests.get(url).json()
-    fare_predicted = response['predicted_fare']
-    st.text("the predicted price should be ")
-    st.text(fare_predicted)
+# if st.button('Artifial Intelligence will compute best fare for your accomodation'):
+#     url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
+#     st.text(url)
+#     response = requests.get(url).json()
+#     fare_predicted = response['predicted_fare']
+#     st.text("the predicted price should be ")
+#     st.text(fare_predicted)
 
-###############
-# Rich Rating chart
+# ###############
+# # Rich Rating chart
 
-def neighbourhood_reviews(neighbourhood):
-    scores_rating = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/review_scores.csv')
+# def neighbourhood_reviews(neighbourhood):
+#     scores_rating = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/review_scores.csv')
 
-    labels = ['accuracy', "cleanliness", "location", "communication","value", "checkin"]
-    points = len(labels)
-    angles = np.linspace(0, 2 * np.pi, points, endpoint=False).tolist()
-    angles += angles[:1]
-    angles.pop()
-    neighbourhood_rating = scores_rating[scores_rating['neighbourhood'] == neighbourhood]
-    neighbourhood_rating = neighbourhood_rating.groupby('neighbourhood').median()
+#     labels = ['accuracy', "cleanliness", "location", "communication","value", "checkin"]
+#     points = len(labels)
+#     angles = np.linspace(0, 2 * np.pi, points, endpoint=False).tolist()
+#     angles += angles[:1]
+#     angles.pop()
+#     neighbourhood_rating = scores_rating[scores_rating['neighbourhood'] == neighbourhood]
+#     neighbourhood_rating = neighbourhood_rating.groupby('neighbourhood').median()
     
-    def add_to_star_neighbourhood(neighbourhood, color, label=None):
-        values = neighbourhood_rating.loc[neighbourhood].tolist()
-        values += values[:1]
-        del values[0]
-        values.pop()
-        if label != None:
-            ax.plot(angles, values, color=color, linewidth=1, label=label)
-        else:
-            ax.plot(angles, values, color=color, linewidth=1, label=neighbourhood)
-        ax.fill(angles, values, color=color, alpha=0.25)
+#     def add_to_star_neighbourhood(neighbourhood, color, label=None):
+#         values = neighbourhood_rating.loc[neighbourhood].tolist()
+#         values += values[:1]
+#         del values[0]
+#         values.pop()
+#         if label != None:
+#             ax.plot(angles, values, color=color, linewidth=1, label=label)
+#         else:
+#             ax.plot(angles, values, color=color, linewidth=1, label=neighbourhood)
+#         ax.fill(angles, values, color=color, alpha=0.25)
 
-    ## Create plot object   
-    fig, ax = plt.subplots(figsize=(3, 3), subplot_kw=dict(polar=True))
+#     ## Create plot object   
+#     fig, ax = plt.subplots(figsize=(3, 3), subplot_kw=dict(polar=True))
 
-    ## Fix axis to star from top
-    ax.set_theta_offset(np.pi / 2)
+#     ## Fix axis to star from top
+#     ax.set_theta_offset(np.pi / 2)
 
-    ax.set_theta_direction(-1)
+#     ax.set_theta_direction(-1)
 
-    # Change the color of the ticks
-    ax.tick_params(colors='#222222')
-
-
-    ax.tick_params(axis='y', labelsize=0)
-    # Make the x-axis labels larger or smaller.
-    ax.tick_params(axis='x', labelsize=13)
+#     # Change the color of the ticks
+#     ax.tick_params(colors='#222222')
 
 
-    # Change the color of the circular gridlines.
-    ax.grid(color='#AAAAAA')
-
-    # Change the color of the outer circle
-    ax.spines['polar'].set_color('#222222')
-
-    # Change the circle background color
-    ax.set_facecolor('#FAFAFA')# Add title and legend
-    ax.set_title('Comparing Property Ratings', y=1.08)
-
-    # Draw axis lines for each angle and label.
-    ax.set_thetagrids(np.degrees(angles), labels)
+#     ax.tick_params(axis='y', labelsize=0)
+#     # Make the x-axis labels larger or smaller.
+#     ax.tick_params(axis='x', labelsize=13)
 
 
-    return add_to_star_neighbourhood(neighbourhood, '#1aaf6c', "First Property")
+#     # Change the color of the circular gridlines.
+#     ax.grid(color='#AAAAAA')
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
-st.pyplot(neighbourhood_reviews(neighbourhood))
+#     # Change the color of the outer circle
+#     ax.spines['polar'].set_color('#222222')
+
+#     # Change the circle background color
+#     ax.set_facecolor('#FAFAFA')# Add title and legend
+#     ax.set_title('Comparing Property Ratings', y=1.08)
+
+#     # Draw axis lines for each angle and label.
+#     ax.set_thetagrids(np.degrees(angles), labels)
+
+
+#     return add_to_star_neighbourhood(neighbourhood, '#1aaf6c', "First Property")
+
+# st.set_option('deprecation.showPyplotGlobalUse', False)
+# st.pyplot(neighbourhood_reviews(neighbourhood))
+
+neighbourhood = 'Camden'
 
 data = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/superhost.csv')
 
@@ -232,6 +234,26 @@ st.text("The title is...")
 st.text(announce_predicted)
 
 price_df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/price.csv')
+
+def keywords(neighbourhood):
+    df_comments = pd.read_csv(f'https://storage.googleapis.com/airbnbadvice/data/keywords/comments_keywords/{neighbourhood}_comments.csv')
+    col1, col2, col3 = st.columns(3)
+    st.text("The top 3 Superhost comment keywords")
+    first_comments = col1.metric("First", df_comments['keywords'][0])
+    second_comments = col2.metric("Second", df_comments['keywords'][1])
+    third_comments = col3.metric("Third", df_comments['keywords'][2])
+
+    df_neighbourhood = pd.read_csv(f'https://storage.googleapis.com/airbnbadvice/data/keywords/neighbourhood_keywords/{neighbourhood}_neighbourhood.csv')
+    col1_n, col2_n, col3_n = st.columns(3)
+    st.text("The top 3 Superhost neighbourhood summary keywords")
+    first_n = col1.metric("First", df_neighbourhood['keywords'][0])
+    second_n = col2.metric("Second", df_neighbourhood['keywords'][1])
+    third_n = col3.metric("Third", df_neighbourhood['keywords'][2])
+
+    return first_comments, second_comments, third_comments, first_n , second_n , third_n
+
+keywords(neighbourhood)
+
 
 # def occup_per_year(price_df, neighbourhood):
 
