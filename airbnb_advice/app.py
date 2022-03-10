@@ -57,8 +57,8 @@ accomodates = int(st.sidebar.number_input('how many guests can you accomodate' ,
 
 
 
-#####fonction pour récupére l'API
-if st.button('best keywords for the city'):
+# # #####fonction pour récupére l'API
+if st.button('Top Keywords Used by Superhosts in London'):
     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
     response = requests.get(url).json()
     city_keywords = response["keywords"]
@@ -66,15 +66,6 @@ if st.button('best keywords for the city'):
     st.text(text_to_show) #show the text of the  API
     st.text(city_keywords)
 
-# tokenizer = Tokenizer()
-# tokenizer.fit_on_texts(lines)
-# sequences = tokenizer.texts_to_sequences(lines)
-
-# Loading the deep learning model
-# model = load_model('/home/thomas/code/thomasgassin/airbnb_advice/airbnb_advice/models_testdeep_model_best(1).h5')
-# adds = st.text_input("adds", "Fill in two keywords")
-# if st.button('the best announce will be '):
-#     st.text(generate_text_seq(model, tokenizer, 6, seed_text=adds, n_words=7))
 # Getting pick up location as address and transforming to coordinates
 neighbourhood = None
 loc = Nominatim(user_agent= "GetLoc" )
@@ -105,31 +96,30 @@ else:
     else:
         st.text('address not located')
 
-if neighbourhood is not None :
-    st.markdown(neighbourhood)
-    url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
-    # st.markdown(url_map)
+# if neighbourhood is not None :
+#     st.markdown(neighbourhood)
+#     url_map = f"https://directingtotheendpoint/maps/?city={city_user}?neigbourhood={neighbourhood}" #create teh endpoint
+#     st.markdown(url_map)
 
-############API for the map
-
-
-# response = requests.get(url).json()
-# neighboorhood = response["keywords"]
+# ############ API for the map
+#     response = requests.get(url_map).json()
+#     neighboorhood = response["keywords"]
 #     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
 #     st.text(text_to_show) #show the text of the  API
 #     st.text(city_keywords)
 
-# def density_map_hood(data, neighbourhood, lat_long_hood):
-#     lat = lat_long_hood.loc[neighbourhood].latitude
-#     lon = lat_long_hood.loc[neighbourhood].longitude
-#     m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
-#     for index, row in data.iterrows():
-#         folium.CircleMarker([row['latitude'], row['longitude']],
-#                             radius=1,
-#                             fill=True,
-#                             opacity=0.7).add_to(m)
-#     return m
-# density plot given neighbourhood
+def density_map_hood(data, neighbourhood, lat_long_hood):
+    lat = lat_long_hood.loc[neighbourhood].latitude
+    lon = lat_long_hood.loc[neighbourhood].longitude
+    m = folium.Map([lat, lon], zoom_start=14, tiles="CartoDB positron")
+    for index, row in data.iterrows():
+        folium.CircleMarker([row['latitude'], row['longitude']],
+                            radius=1,
+                            fill=True,
+                            opacity=0.7).add_to(m)
+    return m
+
+#density plot given neighbourhood
 
 def density_map_hood(data, neighbourhood, lat_long_hood):
     lat = lat_long_hood.loc[neighbourhood].latitude
@@ -154,7 +144,7 @@ def csv_loader(X,neighbourhood):
 
 
 # st.map(csv_loader(data_maps,neighbourhood))
-csv_loader(data_maps,neighbourhood)
+#csv_loader(data_maps,neighbourhood)
 
 #########################################
 
@@ -231,3 +221,12 @@ data = pd.read_csv('raw_data/superhost.csv')
 
 fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
 st.write(fig)
+
+
+
+words = st.text_input('Describe the Airbnb you want to list for the title')
+url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
+response_announce = requests.get(url).json()
+announce_predicted = response_announce['announce']
+st.text("The title is...")
+st.text(announce_predicted)
