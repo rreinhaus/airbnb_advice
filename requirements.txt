@@ -36,3 +36,6 @@ geopandas
 geopy
 folium
 streamlit_folium
+matplotlib
+plotlib
+plotly

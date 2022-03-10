@@ -217,7 +217,7 @@ def neighbourhood_reviews(neighbourhood):
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.pyplot(neighbourhood_reviews(neighbourhood))
 
-data = pd.read_csv('raw_data/superhost.csv')
+data = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/superhost.csv')
 
 fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
 st.write(fig)
