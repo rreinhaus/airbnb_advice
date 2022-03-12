@@ -258,24 +258,31 @@ data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_da
 
 st.set_page_config(
             page_title="Airbnb Advice", # => Quick reference - Streamlit
-            page_icon="🐍",
+            page_icon="🏠",
             layout="wide", # wide
             initial_sidebar_state="auto") # collapsed
 
 st.markdown('''
-# AIRBNB ADVICE ''')
+# AIRBNB ADVICE 
+
+The aim of the application is to provide Airbnb hosts and potential hosts insights about their neighbourhood. 
+
+We also try to help to optimize listings by providing price per night prediction and auto-generated titles and descriptions''')
+
+st.markdown('---')
 
 #####  collection of the data form the USER in the SIDEBAR
-country=st.sidebar.text_input('select a country','UK')
-city_user = st.sidebar.selectbox('select a city',  ["London",""] )
-address = st.sidebar.text_input("adress", "Fill in the adress of your housing")
+country=st.sidebar.text_input('Select a country','UK')
+city_user = st.sidebar.selectbox('Select a city',  ["London",""] )
+address = st.sidebar.text_input("Address", "Your street name and number")
 full_adress = address + city_user + country
 
-entire_home = st.sidebar.checkbox("Chek if you rent the entire home", value = False ) # binary does the user rent the full accomodation or not
-nb_bedrooms = st.sidebar.slider("number or rooms", 1,10,2) #the number of room
-nb_beds = st.sidebar.slider("how many beds",1,10,2) # the number of beds
-min_nights = st.sidebar.slider("minimum night", 1,7,1)
-accomodates = int(st.sidebar.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
+entire_home = st.sidebar.checkbox("Are you renting entire home?", value = False ) # binary does the user rent the full accomodation or not
+nb_bedrooms = st.sidebar.slider("Number of rooms", 1,10,2) #the number of room
+nb_beds = st.sidebar.slider("Number of Beds",1,10,2) # the number of beds
+min_nights = st.sidebar.slider("Minimum nights that people have to stay", 1,7,1)
+accomodates = int(st.sidebar.number_input('How many guests can you accomodate?' , min_value=0, value=5, step=1 ))
+navi = st.sidebar.radio("Data Sections To Display", ('Neighbourhood Stats','Title & Describtions')) 
 
 # Getting pick up location as address and transforming to coordinates
 #neighbourhood = None
@@ -308,7 +315,7 @@ else:
 # PRICE PREDICTION
 
 if st.sidebar.button(
-        'Calculate how much you should price per night your property'):
+        'Find out the best price per night for your property'):
     url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
     # st.text(url)
     my_bar = st.sidebar.progress(0)
@@ -328,165 +335,211 @@ price_df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/price.c
 price_df['occupancy_month'] = price_df['days_booked_month']/31
 ame = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/ame_final.csv')
 
-st.markdown(f'### Neighbourhood Stats - {neighbourhood}')
-st.markdown('---')
-st.markdown('**Top 10 Amenities**')
+if navi == 'Title & Describtions':
+    st.markdown("""
+            # Listing Optimization Zone
 
-ame_col1, ame_col2, ame_col3, ame_col4, ame_col5 = st.columns(5)
-with ame_col1:
-    st.markdown('wifi')
-    st.markdown('Essentials')
+            ### Auto-Generated Airbnb title
 
-with ame_col2:
-    st.markdown('Kitchen')
-    st.markdown('Heating')
+            Please give two - three words that describes your property
+        """)
 
-with ame_col3:
-    st.markdown('Smoke Alarm')
-    st.markdown('Long term stays allowed')
+    words = st.text_input('Property Describtion')
+    if words:
+        url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
+        response_announce = requests.get(url).json()
+        announce_predicted = response_announce['announce']
+        st.text(words + ' - ' + announce_predicted)
+    
+    st.markdown('---')
+    st.markdown("""
+            ### The top 3 Superhost comment & neighbourhood overview keywords
 
-with ame_col4:
-    st.markdown('Washer')
-    st.markdown('Hanger')
+            These are the keywords specific to your area that unsupervised machine learning model came up with ;) 
+        """)
+    keywords(neighbourhood)
 
-with ame_col5:
-    st.markdown('Iron')
-    st.markdown('Hair Dryer')
+    st.markdown("""
 
-st.markdown('---')
+            ### 🚧 work in progress 🚧
 
-# Amenities
+            Next week we will try to demo also full description generator 😉
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric(label="Number of Amenities from Top 10",
-            value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['total_top10'])}",
+        """)
+else:
+    st.markdown(f'### Neighbourhood Stats - {neighbourhood}')
+    st.markdown('---')
+    st.markdown('**Top 10 Amenities**')
+
+    ame_col1, ame_col2, ame_col3, ame_col4, ame_col5 = st.columns(5)
+    with ame_col1:
+        st.markdown('wifi')
+        st.markdown('Essentials')
+
+    with ame_col2:
+        st.markdown('Kitchen')
+        st.markdown('Heating')
+
+    with ame_col3:
+        st.markdown('Smoke Alarm')
+        st.markdown('Long term stays allowed')
+
+    with ame_col4:
+        st.markdown('Washer')
+        st.markdown('Hanger')
+
+    with ame_col5:
+        st.markdown('Iron')
+        st.markdown('Hair Dryer')
+
+    st.markdown('---')
+
+    # Amenities
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric(label="Number of Amenities from Top 10",
+                value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['total_top10'])}",
+                delta=None,
+                delta_color="normal")
+    with col2:
+        st.metric(label='Properties rented as Entire Home',
+                value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['entire_home_percent'] *100,2)}%",
+                delta=None,
+                delta_color="normal")
+    with col3:
+        st.metric(
+            label='Properties rented as Private Room',
+            value=
+            f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['private_room_percent'] *100,2)}%",
             delta=None,
             delta_color="normal")
-with col2:
-    st.metric(label='Properties rented as Entire Home',
-              value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['entire_home_percent'] *100,2)}%",
-              delta=None,
-              delta_color="normal")
-with col3:
-    st.metric(
-        label='Properties rented as Private Room',
-        value=
-        f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['private_room_percent'] *100,2)}%",
-        delta=None,
-        delta_color="normal")
-with col4:
-    st.metric(
-        label='Properties rented as Share Room',
-        value=
-        f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['shared_room_percent'] *100,2)}%",
-        delta=None,
-        delta_color="normal")
+    with col4:
+        st.metric(
+            label='Properties rented as Share Room',
+            value=
+            f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['shared_room_percent'] *100,2)}%",
+            delta=None,
+            delta_color="normal")
 
-# Density Map & Price Plots
-chart1, chart2 = st.columns(2)
-with chart1:
-    # Density Map
-    csv_loader(data_maps,neighbourhood)
-with chart2:
-    # Price Plot 
-    Q1 = price_df.price.quantile(0.25).round(3)
-    Q3 = price_df.price.quantile(0.75).round(3)
-    IQR = Q3 - Q1
-    outlier = Q3 + 1.5*IQR 
-    price_plot = px.histogram(price_df[price_df['price'] <= outlier], x='price', nbins=10)
-    st.write(price_plot)
-    
-# Superhost & Revenue
-chart3, chart4 = st.columns(2)
-with chart3:
-    # Neighbourhood Superhost Plot
-    fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
-    st.write(fig)
+    st.markdown('---')
 
-with chart4:
-    # Revenue plot
-    group_labels = ['pot_rev_month']
-    rev_plot = px.histogram(price_df[['pot_rev_month']], x='pot_rev_month', nbins=10)
-    #rev_plot = ff.create_distplot([price_df['pot_rev_month']],group_labels, bin_size=.10, curve_type='normal')
-    st.write(rev_plot)
+    # Density Map & Price Plots
+    chart1, chart2 = st.columns(2)
+    with chart1:
+        # Density Map
+        expander = st.expander("Density Map - More Info")
 
-# # Ratings & Occupancy
-# chart5, chart6 = st.columns(2)
-# with chart5:
-#     # Occupancy Plot
-#     occup_plot = draw_plot(price_df[['occupancy_month']], 'occupancy_month')
-#     st.write(occup_plot)
+        expander.markdown("""The Neighbourhood Density Map. 
 
-# with chart6:
-#     # Neigbourhood Rating Plot
-#     st.set_option('deprecation.showPyplotGlobalUse', False)
-#     st.pyplot(neighbourhood_reviews(neighbourhood))
+            The map presents each property within your neighbourhood and where it is located. 
 
-# Potential Revenue Based On your apartment plot
-if st.button('What is your potential revenue?'):
-    url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
-    response = requests.get(url).json()
-    fare_predicted = response['predicted_fare']
-    if fare_predicted is not None:
+            The aim of the map is to see where the most properties are located in your specific area and how many there are.
 
-        monthly_revenue = occup_per_year(
+            """)
+        csv_loader(data_maps,neighbourhood)
+    with chart2:
+        # Price Plot 
+        price_expand = st.expander("Property Price - More Info")
 
-            price_df, neighbourhood)[1] * 30.5 * fare_predicted
+        price_expand.markdown("""Property Price Distribution. 
 
-        yearly_revenue = occup_per_year(
+            The chart showcases how the properties are priced within your neighbourhood. 
 
-            price_df, neighbourhood)[2] * 365 * fare_predicted
+            Please take into consideration for better representation we have taken out the outliers.
 
-        st.text(f'''If you achieve the average occupancy rate of your area, 
-        your potential revenue is of £{round(monthly_revenue,2)} per month and
-        £{round(yearly_revenue,2)} per year.''')
+            """)
+        Q1 = price_df.price.quantile(0.25).round(3)
+        Q3 = price_df.price.quantile(0.75).round(3)
+        IQR = Q3 - Q1
+        outlier = Q3 + 1.5*IQR 
+        price_plot = px.histogram(price_df[price_df['price'] <= outlier], x='price', nbins=10)
+        st.write(price_plot)
+        
+    # Superhost & Revenue
+    chart3, chart4 = st.columns(2)
+    with chart3:
+        # Neighbourhood Superhost Plot 
+        superhost_expand = st.expander("Superhost status - More Info")
 
-        st.pyplot(occup_per_year(price_df, neighbourhood)[0])
+        superhost_expand.markdown("""Superhost status chart. 
 
-    else:
+            The chart showcases how many of the total neighbourhood property owners are superhosts. 
+            """)
+        fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
+        st.write(fig)
 
-        st.text('''Please run the model above first.''')
+    with chart4:
+        # Revenue plot
+        rev_expand = st.expander("Monthly revenues - More Info")
 
-# The NLP Part
-#if st.checkbox('Do you want to optimize your listing?'):
-st.markdown("""
-        # Listing Optimization Zone
+        rev_expand.markdown("""Monhtly revenue chart. 
 
-        ### Auto-Generated Airbnb title
+            The chart showcases based on each property occupancy rate, what is the distribution of airbnb property potential revenue targets. 
 
-        Please give two - three words that describes your property
-    """)
+            P.S. The property revenues per month are not guaranteed and this is not financial advise by any means.
+            """)
 
-words = st.text_input('Property Describtion')
-if words:
-    url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
-    response_announce = requests.get(url).json()
-    announce_predicted = response_announce['announce']
-    st.text(words + ' - ' + announce_predicted)
+        group_labels = ['pot_rev_month']
+        rev_plot = px.histogram(price_df[['pot_rev_month']], x='pot_rev_month', nbins=10)
+        #rev_plot = ff.create_distplot([price_df['pot_rev_month']],group_labels, bin_size=.10, curve_type='normal')
+        st.write(rev_plot)
 
-st.markdown("""
-        ### The top 3 Superhost comment & neighbourhood overview keywords
+    # Ratings & Occupancy
+    chart5, chart6 = st.columns(2)
+    with chart5:
+        # Occupancy Plot
+        occupancy_expand = st.expander("Occupancy Rates - More Info")
+        occupancy_expand.markdown("""Occupancy Rate Target Chart. 
 
-        These are the keywords specific to your area that unsupervised machine Learning model came up with ;) 
-    """)
-keywords(neighbourhood)
+                The chart showcases based on each listed property avaible and booked previous nights what is the aimed occupancy rate for each property. 
 
-st.markdown("""
+                P.S. The property occupancy rates are not guaranteed and this is not financial advise by any means.
+                """)
+        occup_plot = draw_plot(price_df[['occupancy_month']], 'occupancy_month')
+        st.write(occup_plot)
 
-        ### 🚧 work in progress 🚧
+    # with chart6:
+    #     # Neigbourhood Rating Plot
+    #     st.set_option('deprecation.showPyplotGlobalUse', False)
+    #     st.pyplot(neighbourhood_reviews(neighbourhood))
 
-        Next week we will try to demo also full description generator 😉
+    # Potential Revenue Based On your apartment plot
+    if st.button('What is your potential revenue?'):
+        url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
+        response = requests.get(url).json()
+        fare_predicted = response['predicted_fare']
+        if fare_predicted is not None:
 
-    """)
+            monthly_revenue = occup_per_year(
+
+                price_df, neighbourhood)[1] * 30.5 * fare_predicted
+
+            yearly_revenue = occup_per_year(
+
+                price_df, neighbourhood)[2] * 365 * fare_predicted
+
+            st.text(f'''If you achieve the average occupancy rate of your area, 
+            your potential revenue is of £{round(monthly_revenue,2)} per month and
+            £{round(yearly_revenue,2)} per year.''')
+
+            st.pyplot(occup_per_year(price_df, neighbourhood)[0])
+
+        else:
+
+            st.text('''Please run the model above first.''')
+
+    # The NLP Part
+    #if st.checkbox('Do you want to optimize your listing?'):
 
 
-# # London Keywords
-# if st.button('Top Keywords Used by Superhosts in London'):
-#     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
-#     response = requests.get(url).json()
-#     city_keywords = response["keywords"]
-#     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
-#     st.text(text_to_show) #show the text of the  API
-#     st.text(city_keywords)
-#     #st.table(city_keywords)
+
+    # # London Keywords
+    # if st.button('Top Keywords Used by Superhosts in London'):
+    #     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
+    #     response = requests.get(url).json()
+    #     city_keywords = response["keywords"]
+    #     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
+    #     st.text(text_to_show) #show the text of the  API
+    #     st.text(city_keywords)
+    #     #st.table(city_keywords)
