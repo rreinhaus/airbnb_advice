@@ -277,30 +277,17 @@ nb_beds = st.sidebar.slider("how many beds",1,10,2) # the number of beds
 min_nights = st.sidebar.slider("minimum night", 1,7,1)
 accomodates = int(st.sidebar.number_input('how many guests can you accomodate' , min_value=0, value=5, step=1 ))
 
-# London Keywords
-if st.button('Top Keywords Used by Superhosts in London'):
-    url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
-    response = requests.get(url).json()
-    city_keywords = response["keywords"]
-    text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
-    st.text(text_to_show) #show the text of the  API
-    st.text(city_keywords)
-    #st.table(city_keywords)
-
-
 # Getting pick up location as address and transforming to coordinates
-neighbourhood = None
+#neighbourhood = None
 loc = Nominatim(user_agent= "GetLoc" )
 geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
 location = loc.geocode(address +","+city_user+","+ country,addressdetails=True)
 
 if location is None:
-    st.text('it is bad address, try again')
+    st.text('Address is missing! Please enter street name in the sidebar')
 else:
     latitude = location.latitude
     longitude = location.longitude
-    st.markdown(latitude)
-    st.markdown(longitude)
     if 'borough' in location.raw['address']:
         neighbourhood = location.raw['address']['borough'].replace(
             'London Borough of ', '')
@@ -465,3 +452,14 @@ st.markdown("""
         Next week we will try to demo also full description generator 😉
 
     """)
+
+
+# # London Keywords
+# if st.button('Top Keywords Used by Superhosts in London'):
+#     url = "https://airbnbadvice-zktracgm3q-ew.a.run.app/keywords/?city="+city_user
+#     response = requests.get(url).json()
+#     city_keywords = response["keywords"]
+#     text_to_show = 'the best keywords for '+city_user+' found by our artifical inteligence are : '
+#     st.text(text_to_show) #show the text of the  API
+#     st.text(city_keywords)
+#     #st.table(city_keywords)
