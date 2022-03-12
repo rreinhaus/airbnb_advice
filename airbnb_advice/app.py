@@ -24,7 +24,7 @@ import plotly.express as px
 st.set_page_config(
             page_title="Airbnb Advice", # => Quick reference - Streamlit
             page_icon="🐍",
-            layout="centered", # wide
+            layout="wide", # wide
             initial_sidebar_state="auto") # collapsed
 
 
@@ -219,6 +219,38 @@ def neighbourhood_reviews(neighbourhood):
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.pyplot(neighbourhood_reviews(neighbourhood))
 
+ame = pd.read_csv(
+    'https://storage.googleapis.com/airbnbadvice/data/ame_final.csv')
+
+# st.dataframe(data=ame)
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric(label='Top 10 Amenities',
+            value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['total_top10'])}",
+            delta=None,
+            delta_color="normal")
+with col2:
+    st.metric(label='Entire Home',
+              value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['entire_home_percent'] *100,2)}%",
+              delta=None,
+              delta_color="normal")
+with col3:
+    st.metric(
+        label='Private Room',
+        value=
+        f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['private_room_percent'] *100,2)}%",
+        delta=None,
+        delta_color="normal")
+with col4:
+    st.metric(
+        label='Share Room',
+        value=
+        f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['shared_room_percent'] *100,2)}%",
+        delta=None,
+        delta_color="normal")
+
+
+
 data = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/superhost.csv')
 
 fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
@@ -232,119 +264,141 @@ st.text("The title is...")
 st.text(announce_predicted)
 
 price_df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/price.csv')
+price_df['occupancy_month'] = price_df['days_booked_month']/31
 
-# def occup_per_year(price_df, neighbourhood):
+def keywords(neighbourhood):
+    df_comments = pd.read_csv(f'https://storage.googleapis.com/airbnbadvice/data/keywords/comments_keywords/{neighbourhood}_comments.csv')
+    col1, col2, col3 = st.columns(3)
+    st.text("The top 3 Superhost comment keywords")
+    first_comments = col1.metric("First", df_comments['keywords'][0])
+    second_comments = col2.metric("Second", df_comments['keywords'][1])
+    third_comments = col3.metric("Third", df_comments['keywords'][2])
 
-#     occup_hood = price_df.groupby("neighbourhood_cleansed").median()[[
+    df_neighbourhood = pd.read_csv(f'https://storage.googleapis.com/airbnbadvice/data/keywords/neighbourhood_keywords/{neighbourhood}_neighbourhood.csv')
+    col1_n, col2_n, col3_n = st.columns(3)
+    st.text("The top 3 Superhost neighbourhood summary keywords")
+    first_n = col1.metric("First", df_neighbourhood['keywords'][0])
+    second_n = col2.metric("Second", df_neighbourhood['keywords'][1])
+    third_n = col3.metric("Third", df_neighbourhood['keywords'][2])
 
-#         'occupancy_month', 'occupancy_year'
+    return first_comments, second_comments, third_comments, first_n , second_n , third_n
 
-#     ]].reset_index()
+keywords(neighbourhood)
 
-#     occupied = occup_hood[(
+st.dataframe(price_df.head())
 
-#         occup_hood['neighbourhood_cleansed'] == neighbourhood)]
+def occup_per_year(price_df, neighbourhood):
 
-#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 5))
+    occup_hood = price_df.groupby("neighbourhood_cleansed").median()[[
 
-#     fig.suptitle('Percentages of occupancy', fontsize=20)
+        'occupancy_month', 'occupancy_year'
 
-#     to_plot_month = [
+    ]].reset_index()
 
-#         float(occupied['occupancy_month']),
+    occupied = occup_hood[(
 
-#         1 - float(occupied['occupancy_month'])
+        occup_hood['neighbourhood_cleansed'] == neighbourhood)]
 
-#     ]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 5))
 
-#     mylabels_month = [
+    fig.suptitle('Percentages of occupancy', fontsize=20)
 
-#         'occupied' + '\n' +
+    to_plot_month = [
 
-#         str(round(float(occupied['occupancy_month']) * 100, 2)) + '%', 'vacant'
+        float(occupied['occupancy_month']),
 
-#     ]
+        1 - float(occupied['occupancy_month'])
 
-#     myexplode = [0.1, 0]
+    ]
 
-#     ax1.pie(
+    mylabels_month = [
 
-#         to_plot_month,
+        'occupied' + '\n' +
 
-#         labels=mylabels_month,
+        str(round(float(occupied['occupancy_month']) * 100, 2)) + '%', 'vacant'
 
-#         explode=myexplode,
+    ]
 
-#         radius=1.3,
+    myexplode = [0.1, 0]
 
-#         labeldistance=0.5,
+    ax1.pie(
 
-#         #rotatelabels=True,
+        to_plot_month,
 
-#         textprops=dict(rotation_mode='anchor', va='center', ha='left'),
+        labels=mylabels_month,
 
-#     )
+        explode=myexplode,
 
-#     ax1.set_title('Monthly occupancy', y=1.08)
+        radius=1.3,
 
-#     to_plot_year = [
+        labeldistance=0.5,
 
-#         float(occupied['occupancy_year']),
+        #rotatelabels=True,
 
-#         1 - float(occupied['occupancy_year'])
+        textprops=dict(rotation_mode='anchor', va='center', ha='left'),
 
-#     ]
+    )
 
-#     mylabels_year = [
+    ax1.set_title('Monthly occupancy', y=1.08)
 
-#         'occupied' + '\n' +
+    to_plot_year = [
 
-#         str(round(float(occupied['occupancy_year']) * 100, 2)) + '%', 'vacant'
+        float(occupied['occupancy_year']),
 
-#     ]
+        1 - float(occupied['occupancy_year'])
 
-#     ax2.pie(
+    ]
 
-#         to_plot_year,
+    mylabels_year = [
 
-#         labels=mylabels_year,
+        'occupied' + '\n' +
 
-#         explode=myexplode,
+        str(round(float(occupied['occupancy_year']) * 100, 2)) + '%', 'vacant'
 
-#         radius=1.3,
+    ]
 
-#         labeldistance=0.5,
+    ax2.pie(
 
-#         textprops=dict(rotation_mode='anchor', va='center', ha='left'),
+        to_plot_year,
 
-#     )
+        labels=mylabels_year,
 
-#     ax2.set_title('Yearly occupancy', y=1.08)
+        explode=myexplode,
 
-#     return fig, to_plot_month[0], to_plot_year[0]
+        radius=1.3,
 
-#fare_predicted = 400 # DELETE when above is working
+        labeldistance=0.5,
 
-# if st.button('What is your potential revenue?'):
+        textprops=dict(rotation_mode='anchor', va='center', ha='left'),
 
-#     if fare_predicted is not None:
+    )
 
-#         monthly_revenue = occup_per_year(
+    ax2.set_title('Yearly occupancy', y=1.08)
 
-#             price_df, neighbourhood)[1] * 30.5 * fare_predicted
+    return fig, to_plot_month[0], to_plot_year[0]
 
-#         yearly_revenue = occup_per_year(
+fare_predicted = 400 # DELETE when above is working
 
-#             price_df, neighbourhood)[2] * 365 * fare_predicted
+if st.button('What is your potential revenue?'):
 
-#         st.text(f'''If you achieve the average occupancy rate of your area,
+    if fare_predicted is not None:
 
-# your potential revenue is of £{monthly_revenue} per month and
+        monthly_revenue = occup_per_year(
 
-# £{yearly_revenue} per year.''')
+            price_df, neighbourhood)[1] * 30.5 * fare_predicted
 
-#         st.pyplot(occup_per_year(price_df, neighbourhood)[0])
+        yearly_revenue = occup_per_year(
 
-#     else:
+            price_df, neighbourhood)[2] * 365 * fare_predicted
 
-#         st.text('''Please run the model above first.''')
+        st.text(f'''If you achieve the average occupancy rate of your area,
+
+your potential revenue is of £{monthly_revenue} per month and
+
+£{yearly_revenue} per year.''')
+
+        st.pyplot(occup_per_year(price_df, neighbourhood)[0])
+
+    else:
+
+        st.text('''Please run the model above first.''')
