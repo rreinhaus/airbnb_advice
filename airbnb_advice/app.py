@@ -250,9 +250,9 @@ def keywords(neighbourhood):
 
 ###################################### Streamlit Start ################################
 
-neighbourhood = 'Camden'
-latitude = 51.51988089870245
-longitude = -0.041186831798636546
+# neighbourhood = 'Camden'
+# latitude = 51.51988089870245
+# longitude = -0.041186831798636546
 data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_data.csv")
 
 st.set_page_config(
@@ -287,35 +287,35 @@ if st.button('Top Keywords Used by Superhosts in London'):
     #st.table(city_keywords)
 
 
-# # Getting pick up location as address and transforming to coordinates
-# neighbourhood = None
-# loc = Nominatim(user_agent= "GetLoc" )
-# geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
-# location = loc.geocode(address +","+city_user+","+ country,addressdetails=True)
+# Getting pick up location as address and transforming to coordinates
+neighbourhood = None
+loc = Nominatim(user_agent= "GetLoc" )
+geocode = RateLimiter(loc.geocode, min_delay_seconds=1)
+location = loc.geocode(address +","+city_user+","+ country,addressdetails=True)
 
-# if location is None:
-#     st.text('it is bad address, try again')
-# else:
-#     latitude = location.latitude
-#     longitude = location.longitude
-#     st.markdown(latitude)
-#     st.markdown(longitude)
-#     if 'borough' in location.raw['address']:
-#         neighbourhood = location.raw['address']['borough'].replace(
-#             'London Borough of ', '')
-#     elif 'city_district' in location.raw['address']:
-#         neighbourhood = location.raw['address']['city_district'].replace(
-#             'London Borough of ', '')
-#     elif 'quarter' in location.raw['address']:
-#             neighbourhood = location.raw['address']['quarter'].replace(
-#         'London Borough of ','')
-#     elif 'suburb' in location.raw['address']:
-#         neighbourhood = location.raw['address']['suburb'].replace(
-#             'London Borough of ', '')
-#     elif 'city' in location.raw['address']:
-#         neighbourhood = location.raw['address']['city']
-#     else:
-#         st.text('address not located')
+if location is None:
+    st.text('it is bad address, try again')
+else:
+    latitude = location.latitude
+    longitude = location.longitude
+    st.markdown(latitude)
+    st.markdown(longitude)
+    if 'borough' in location.raw['address']:
+        neighbourhood = location.raw['address']['borough'].replace(
+            'London Borough of ', '')
+    elif 'city_district' in location.raw['address']:
+        neighbourhood = location.raw['address']['city_district'].replace(
+            'London Borough of ', '')
+    elif 'quarter' in location.raw['address']:
+            neighbourhood = location.raw['address']['quarter'].replace(
+        'London Borough of ','')
+    elif 'suburb' in location.raw['address']:
+        neighbourhood = location.raw['address']['suburb'].replace(
+            'London Borough of ', '')
+    elif 'city' in location.raw['address']:
+        neighbourhood = location.raw['address']['city']
+    else:
+        st.text('address not located')
 
 # PRICE PREDICTION
 
@@ -434,8 +434,8 @@ if st.button('What is your potential revenue?'):
         st.text('''Please run the model above first.''')
 
 # The NLP Part
-if st.checkbox('Do you want to optimize your listing?'):
-    st.markdown("""
+#if st.checkbox('Do you want to optimize your listing?'):
+st.markdown("""
         # Listing Optimization Zone
 
         ### Auto-Generated Airbnb title
@@ -443,21 +443,21 @@ if st.checkbox('Do you want to optimize your listing?'):
         Please give two - three words that describes your property
     """)
 
-    words = st.text_input('Property Describtion')
-    if words:
-        url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
-        response_announce = requests.get(url).json()
-        announce_predicted = response_announce['announce']
-        st.text(words + ' - ' + announce_predicted)
+words = st.text_input('Property Describtion')
+if words:
+    url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/announcement?keywords1={words}"
+    response_announce = requests.get(url).json()
+    announce_predicted = response_announce['announce']
+    st.text(words + ' - ' + announce_predicted)
 
-    st.markdown("""
+st.markdown("""
         ### The top 3 Superhost comment & neighbourhood overview keywords
 
         These are the keywords specific to your area that unsupervised Deep Learning model came up with ;) 
     """)
-    keywords(neighbourhood)
+keywords(neighbourhood)
 
-    st.markdown("""
+st.markdown("""
 
         ### 🚧 work in progress 🚧
 
