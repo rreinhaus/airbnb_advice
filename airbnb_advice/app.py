@@ -250,9 +250,10 @@ def keywords(neighbourhood):
 
 ###################################### Streamlit Start ################################
 
-# neighbourhood = 'Camden'
-# latitude = 51.51988089870245
-# longitude = -0.041186831798636546
+neighbourhood = 'Camden'
+latitude = 51.51988089870245
+longitude = -0.041186831798636546
+
 data_maps = pd.read_csv("https://storage.googleapis.com/airbnbadvice/data/map_data.csv")
 
 st.set_page_config(
