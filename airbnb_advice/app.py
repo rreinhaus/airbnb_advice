@@ -328,30 +328,56 @@ price_df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/price.c
 price_df['occupancy_month'] = price_df['days_booked_month']/31
 ame = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/ame_final.csv')
 
+st.markdown(f'### Neighbourhood Stats - {neighbourhood}')
+st.markdown('---')
+st.markdown('**Top 10 Amenities**')
+
+ame_col1, ame_col2, ame_col3, ame_col4, ame_col5 = st.columns(5)
+with ame_col1:
+    st.markdown('wifi')
+    st.markdown('Essentials')
+
+with ame_col2:
+    st.markdown('Kitchen')
+    st.markdown('Heating')
+
+with ame_col3:
+    st.markdown('Smoke Alarm')
+    st.markdown('Long term stays allowed')
+
+with ame_col4:
+    st.markdown('Washer')
+    st.markdown('Hanger')
+
+with ame_col5:
+    st.markdown('Iron')
+    st.markdown('Hair Dryer')
+
+st.markdown('---')
 
 # Amenities
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.metric(label='Top 10 Amenities',
+    st.metric(label="Number of Amenities from Top 10",
             value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['total_top10'])}",
             delta=None,
             delta_color="normal")
 with col2:
-    st.metric(label='Entire Home',
+    st.metric(label='Properties rented as Entire Home',
               value=f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['entire_home_percent'] *100,2)}%",
               delta=None,
               delta_color="normal")
 with col3:
     st.metric(
-        label='Private Room',
+        label='Properties rented as Private Room',
         value=
         f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['private_room_percent'] *100,2)}%",
         delta=None,
         delta_color="normal")
 with col4:
     st.metric(
-        label='Share Room',
+        label='Properties rented as Share Room',
         value=
         f"{round(ame[ame['neighbourhood_cleansed'] == neighbourhood].iloc[0]['shared_room_percent'] *100,2)}%",
         delta=None,
@@ -368,7 +394,7 @@ with chart2:
     Q3 = price_df.price.quantile(0.75).round(3)
     IQR = Q3 - Q1
     outlier = Q3 + 1.5*IQR 
-    price_plot = draw_plot(price_df[price_df['price'] <= outlier], 'price')
+    price_plot = px.histogram(price_df[price_df['price'] <= outlier], x='price', nbins=10)
     st.write(price_plot)
     
 # Superhost & Revenue
@@ -381,20 +407,21 @@ with chart3:
 with chart4:
     # Revenue plot
     group_labels = ['pot_rev_month']
-    rev_plot = ff.create_distplot([price_df['pot_rev_month']],group_labels, bin_size=.10, curve_type='normal')
+    rev_plot = px.histogram(price_df[['pot_rev_month']], x='pot_rev_month', nbins=10)
+    #rev_plot = ff.create_distplot([price_df['pot_rev_month']],group_labels, bin_size=.10, curve_type='normal')
     st.write(rev_plot)
 
-# Ratings & Occupancy
-chart5, chart6 = st.columns(2)
-with chart5:
-    # Occupancy Plot
-    occup_plot = draw_plot(price_df[['occupancy_month']], 'occupancy_month')
-    st.write(occup_plot)
+# # Ratings & Occupancy
+# chart5, chart6 = st.columns(2)
+# with chart5:
+#     # Occupancy Plot
+#     occup_plot = draw_plot(price_df[['occupancy_month']], 'occupancy_month')
+#     st.write(occup_plot)
 
-with chart6:
-    # Neigbourhood Rating Plot
-    st.set_option('deprecation.showPyplotGlobalUse', False)
-    st.pyplot(neighbourhood_reviews(neighbourhood))
+# with chart6:
+#     # Neigbourhood Rating Plot
+#     st.set_option('deprecation.showPyplotGlobalUse', False)
+#     st.pyplot(neighbourhood_reviews(neighbourhood))
 
 # Potential Revenue Based On your apartment plot
 if st.button('What is your potential revenue?'):
@@ -441,7 +468,7 @@ if words:
 st.markdown("""
         ### The top 3 Superhost comment & neighbourhood overview keywords
 
-        These are the keywords specific to your area that unsupervised Deep Learning model came up with ;) 
+        These are the keywords specific to your area that unsupervised machine Learning model came up with ;) 
     """)
 keywords(neighbourhood)
 
