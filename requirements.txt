@@ -38,3 +38,5 @@ folium
 streamlit_folium
 matplotlib
 plotly
+time
+seaborn
