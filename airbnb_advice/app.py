@@ -313,10 +313,19 @@ else:
     else:
         st.text('address not located')
 
+# DataFrames for the code
+data = pd.read_csv(
+    'https://storage.googleapis.com/airbnbadvice/data/superhost.csv')
+price_df = pd.read_csv(
+    'https://storage.googleapis.com/airbnbadvice/data/price.csv')
+price_df['occupancy_month'] = price_df['days_booked_month'] / 31
+ame = pd.read_csv(
+    'https://storage.googleapis.com/airbnbadvice/data/ame_final.csv')
+
 # PRICE PREDICTION
 
 if st.sidebar.button(
-        'Find out the best price per night for your property'):
+        'Find out the best price per night for your property and potential revenue'):
     url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
     # st.text(url)
     my_bar = st.sidebar.progress(0)
@@ -330,11 +339,39 @@ if st.sidebar.button(
     st.sidebar.markdown(
         f"The price per nigth should be **{round(fare_predicted,2)} £** ")
 
-# DataFrames for the code
-data = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/superhost.csv')
-price_df = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/price.csv')
-price_df['occupancy_month'] = price_df['days_booked_month']/31
-ame = pd.read_csv('https://storage.googleapis.com/airbnbadvice/data/ame_final.csv')
+    monthly_revenue = occup_per_year(
+            price_df, neighbourhood)[1] * 30.5 * fare_predicted
+
+    yearly_revenue = occup_per_year(
+        price_df, neighbourhood)[2] * 365 * fare_predicted
+
+    st.sidebar.markdown(
+        f'''If you achieve the highest occupancy rate of your area,
+    your potential revenue is of £ {round(monthly_revenue)} per month and
+    £ {round(yearly_revenue)} per year.''')
+
+    # if fare_predicted is not None:
+
+    #     monthly_revenue = occup_per_year(
+    #         price_df, neighbourhood)[1] * 30.5 * fare_predicted
+
+    #     yearly_revenue = occup_per_year(
+    #         price_df, neighbourhood)[2] * 365 * fare_predicted
+
+    #     st.markdown(f'''If you achieve the average occupancy rate of your area,
+    #     your potential revenue is of £{round(monthly_revenue,2)} per month and
+    #     £{round(yearly_revenue,2)} per year.''')
+
+    # else:
+
+    #     st.text('''Please run the model above first.''')
+
+
+
+
+
+
+
 
 if navi == 'Title & Describtions':
     st.markdown("""
@@ -496,7 +533,7 @@ else:
             """)
         fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
         fig.update_traces(marker_line_width=0.5,
-                                 marker_line_color="white")
+                          marker_line_color="white")
         fig.update_layout(bargap=0.1)
         st.plotly_chart(fig, use_container_width=True)
         # st.write(fig)
@@ -545,29 +582,29 @@ else:
     #     st.pyplot(neighbourhood_reviews(neighbourhood))
 
     # Potential Revenue Based On your apartment plot
-    if st.button('What is your potential revenue?'):
-        url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
-        response = requests.get(url).json()
-        fare_predicted = response['predicted_fare']
-        if fare_predicted is not None:
+    # if st.button('What is your potential revenue?'):
+    #     url = f"https://airbnbadvice-zktracgm3q-ew.a.run.app/fare_prediction/?latitude={latitude}&longitude={longitude}&accomodates={accomodates}&bedrooms={nb_bedrooms}&beds={nb_beds}&minimum_nights={min_nights}&Entire_home_apt={min_nights}"
+    #     response = requests.get(url).json()
+    #     fare_predicted = response['predicted_fare']
+    #     if fare_predicted is not None:
 
-            monthly_revenue = occup_per_year(
+    #         monthly_revenue = occup_per_year(
 
-                price_df, neighbourhood)[1] * 30.5 * fare_predicted
+    #             price_df, neighbourhood)[1] * 30.5 * fare_predicted
 
-            yearly_revenue = occup_per_year(
+    #         yearly_revenue = occup_per_year(
 
-                price_df, neighbourhood)[2] * 365 * fare_predicted
+    #             price_df, neighbourhood)[2] * 365 * fare_predicted
 
-            st.text(f'''If you achieve the average occupancy rate of your area,
-            your potential revenue is of £{round(monthly_revenue,2)} per month and
-            £{round(yearly_revenue,2)} per year.''')
+    #         st.text(f'''If you achieve the average occupancy rate of your area,
+    #         your potential revenue is of £{round(monthly_revenue,2)} per month and
+    #         £{round(yearly_revenue,2)} per year.''')
 
-            st.pyplot(occup_per_year(price_df, neighbourhood)[0])
+    #         st.pyplot(occup_per_year(price_df, neighbourhood)[0])
 
-        else:
+    #     else:
 
-            st.text('''Please run the model above first.''')
+    #         st.text('''Please run the model above first.''')
 
     # The NLP Part
     #if st.checkbox('Do you want to optimize your listing?'):
