@@ -372,7 +372,6 @@ if st.sidebar.button(
 
 
 
-
 if navi == 'Title & Describtions':
     st.markdown("""
             # Listing Optimization Zone
