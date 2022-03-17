@@ -207,7 +207,7 @@ def draw_plot(df, column):
     '''
     Returns a scatter plot
     '''
-    fig = px.histogram(df, x=column, nbins=10)
+    fig = px.histogram(df, x=column, nbins=10, title = "New Title")
 
     return fig
 
@@ -491,7 +491,9 @@ else:
                                'occupancy_month')
         occup_plot.update_traces(marker_line_width=0.5,
                                  marker_line_color="white")
-        occup_plot.update_layout(bargap=0.1)
+        occup_plot.update_layout(bargap=0.1, title_text ="Occupancy rate distribution in % ",
+                                title_x=0.5
+                                )
         st.plotly_chart(occup_plot, use_container_width=True)
         # with st.container():
         #     csv_loader(data_maps,neighbourhood)
@@ -516,7 +518,8 @@ else:
         price_plot = px.histogram(price_df[price_df['price'] <= outlier], x='price', nbins=10)
         price_plot.update_traces(marker_line_width=0.5,
                                  marker_line_color="white")
-        price_plot.update_layout(bargap=0.1)
+        price_plot.update_layout(bargap=0.1 , title_text ="Price Distribution in £ ",
+                                title_x=0.5)
         st.plotly_chart(price_plot, use_container_width=True)
         # st.write(price_plot)
 
@@ -533,7 +536,8 @@ else:
         fig = px.histogram(data[data['neighbourhood_cleansed']== neighbourhood], x="host_is_superhost")
         fig.update_traces(marker_line_width=0.5,
                           marker_line_color="white")
-        fig.update_layout(bargap=0.1)
+        fig.update_layout(bargap=0.1, title_text ="Number of superhosts vs normal hosts",
+                                title_x=0.5)
         st.plotly_chart(fig, use_container_width=True)
         # st.write(fig)
 
@@ -553,7 +557,8 @@ else:
         #rev_plot = ff.create_distplot([price_df['pot_rev_month']],group_labels, bin_size=.10, curve_type='normal')
         rev_plot.update_traces(marker_line_width=0.5,
                                  marker_line_color="white")
-        rev_plot.update_layout(bargap=0.1)
+        rev_plot.update_layout(bargap=0.1, title_text ="Potential revenue per month in £",
+                                title_x=0.5)
         st.plotly_chart(rev_plot, use_container_width=True)
         # st.write(rev_plot)
 
